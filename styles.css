@@ -184,6 +184,62 @@ h2 {
     text-align: center;
 }
 
+.habit-streak {
+    font-weight: 500;
+    text-align: center;
+    color: var(--success-color);
+}
+
+.habit-target {
+    font-weight: 500;
+    text-align: center;
+    color: var(--warning-color);
+    position: relative;
+}
+
+.target-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.target-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.target-label {
+    font-size: 10px;
+    color: var(--dark-gray);
+}
+
+.target-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.target-progress-bar {
+    width: 100%;
+    height: 4px;
+    background-color: var(--light-gray);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.target-progress-fill {
+    height: 100%;
+    background-color: var(--warning-color);
+    transition: width 0.3s ease;
+}
+
+.target-progress-fill.completed {
+    background-color: var(--success-color);
+}
+
 .habit-actions {
     display: flex;
     justify-content: center;
@@ -249,39 +305,101 @@ h2 {
     margin-bottom: 32px;
 }
 
-.summary-content {
-    display: flex;
-    gap: 24px;
-}
-
-.summary-stats {
+.summary-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    flex: 1;
+    margin-bottom: 24px;
 }
 
-.stat-item {
+.summary-item {
     background-color: var(--light-gray);
     border-radius: var(--border-radius);
     padding: 16px;
     text-align: center;
+    transition: var(--transition);
 }
 
-.stat-value {
+.summary-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.summary-value {
     font-size: 28px;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    color: var(--primary-color);
 }
 
-.stat-label {
+.summary-label {
     color: var(--dark-gray);
     font-size: 14px;
+    font-weight: 500;
 }
 
-.weekly-chart {
-    flex: 1;
-    min-height: 200px;
+.summary-progress {
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.progress-label {
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: var(--medium-gray);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--success-color);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    text-align: right;
+    font-size: 14px;
+    color: var(--dark-gray);
+}
+
+/* 目标信息提示样式 */
+.target-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+}
+
+.info-icon {
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+.info-text {
+    font-size: 14px;
+    color: var(--dark-gray);
+    line-height: 1.5;
+}
+
+.info-text p {
+    margin-bottom: 8px;
+}
+
+.info-text p:last-child {
+    margin-bottom: 0;
 }
 
 /* 模态框样式 */
@@ -362,8 +480,12 @@ textarea {
         grid-template-columns: 2fr repeat(7, 1fr);
     }
     
-    .habit-score, .habit-actions {
+    .habit-target, .habit-actions {
         display: none;
+    }
+    
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     .week-info {
@@ -389,5 +511,9 @@ textarea {
     .checkmark {
         width: 24px;
         height: 24px;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
     }
 } 

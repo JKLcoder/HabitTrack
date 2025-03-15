@@ -42,7 +42,7 @@
                 <div class="weekday">周五</div>
                 <div class="weekday">周六</div>
                 <div class="weekday">周日</div>
-                <div class="habit-score">评分</div>
+                <div class="habit-target">目标</div>
                 <div class="habit-actions">操作</div>
             </div>
             
@@ -51,32 +51,42 @@
             </div>
         </section>
 
-        <section class="weekly-summary">
+        <!-- 周总结 -->
+        <div class="weekly-summary">
             <h2>本周总结</h2>
-            <div class="summary-content">
-                <div class="summary-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="total-habits">0</div>
-                        <div class="stat-label">习惯总数</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="completed-checkmarks">0</div>
-                        <div class="stat-label">已完成打卡</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="completion-rate">0%</div>
-                        <div class="stat-label">完成率</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="average-score">0</div>
-                        <div class="stat-label">平均评分</div>
-                    </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value" id="total-habits">0</div>
+                    <div class="summary-label">习惯总数</div>
                 </div>
-                <div class="weekly-chart">
-                    <canvas id="weekly-chart-canvas"></canvas>
+                <div class="summary-item">
+                    <div class="summary-value" id="completed-checkmarks">0</div>
+                    <div class="summary-label">完成打卡</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="completion-rate">0%</div>
+                    <div class="summary-label">完成率</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="target-rate">0%</div>
+                    <div class="summary-label">目标达成率</div>
                 </div>
             </div>
-        </section>
+            <div class="summary-progress">
+                <div class="progress-label">本周进度</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="week-progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    已完成 <span id="week-progress-text">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 目标信息提示 -->
+        <div class="target-info">
+            <p>系统会自动记录你每周的最高完成次数，并将其设为下周的目标，鼓励你不断挑战自我！</p>
+        </div>
     </div>
 
     <!-- 添加习惯的模态框 -->
