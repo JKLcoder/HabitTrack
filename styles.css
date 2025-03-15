@@ -1,0 +1,393 @@
+/* 全局样式 */
+:root {
+    --primary-color: #0071e3;
+    --primary-hover: #0077ed;
+    --success-color: #34c759;
+    --warning-color: #ff9500;
+    --danger-color: #ff3b30;
+    --light-gray: #f5f5f7;
+    --medium-gray: #d2d2d7;
+    --dark-gray: #86868b;
+    --text-color: #1d1d1f;
+    --background-color: #ffffff;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --modal-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --border-radius: 10px;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* 标题样式 */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 20px 0;
+}
+
+h1 {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+}
+
+.subtitle {
+    color: var(--dark-gray);
+    font-size: 18px;
+}
+
+/* 周信息样式 */
+.week-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--light-gray);
+    padding: 16px 24px;
+    border-radius: var(--border-radius);
+    margin-bottom: 24px;
+}
+
+.week-navigation {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-button {
+    background: none;
+    border: 1px solid var(--medium-gray);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.nav-button:hover {
+    background-color: var(--medium-gray);
+}
+
+.nav-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* 习惯容器样式 */
+.habits-container {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 32px;
+    overflow: hidden;
+}
+
+.habits-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.weekday-header {
+    display: grid;
+    grid-template-columns: 2fr repeat(7, 1fr) 1fr 1fr;
+    background-color: var(--light-gray);
+    padding: 12px 24px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.habit-name {
+    text-align: left;
+}
+
+/* 习惯列表样式 */
+.habit-row {
+    display: grid;
+    grid-template-columns: 2fr repeat(7, 1fr) 1fr 1fr;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--medium-gray);
+    align-items: center;
+    transition: var(--transition);
+}
+
+.habit-row:hover {
+    background-color: var(--light-gray);
+}
+
+.habit-title {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.habit-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.checkmark {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--medium-gray);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.checkmark:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(0, 113, 227, 0.1);
+}
+
+.checkmark.checked {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.habit-score {
+    font-weight: 600;
+    text-align: center;
+}
+
+.habit-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dark-gray);
+    transition: var(--transition);
+    padding: 4px;
+}
+
+.action-button:hover {
+    color: var(--text-color);
+}
+
+.delete-button:hover {
+    color: var(--danger-color);
+}
+
+/* 按钮样式 */
+.primary-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.primary-button:hover {
+    background-color: var(--primary-hover);
+}
+
+.secondary-button {
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.secondary-button:hover {
+    background-color: var(--medium-gray);
+}
+
+/* 周总结样式 */
+.weekly-summary {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.summary-content {
+    display: flex;
+    gap: 24px;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    flex: 1;
+}
+
+.stat-item {
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    color: var(--dark-gray);
+    font-size: 14px;
+}
+
+.weekly-chart {
+    flex: 1;
+    min-height: 200px;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--modal-shadow);
+    width: 90%;
+    max-width: 500px;
+    padding: 24px;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--dark-gray);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .weekday-header, .habit-row {
+        grid-template-columns: 2fr repeat(7, 1fr);
+    }
+    
+    .habit-score, .habit-actions {
+        display: none;
+    }
+    
+    .week-info {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .summary-content {
+        flex-direction: column;
+    }
+    
+    .checkmark {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 576px) {
+    .weekday {
+        font-size: 12px;
+    }
+    
+    .checkmark {
+        width: 24px;
+        height: 24px;
+    }
+} 

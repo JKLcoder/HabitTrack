@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>习惯打卡</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 添加苹果风格图标 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✓</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>习惯打卡</h1>
+            <p class="subtitle">养成好习惯，每周记录你的进步</p>
+        </header>
+
+        <section class="week-info">
+            <div class="week-display">
+                <h2>第 <span id="current-week">1</span> 周</h2>
+                <p>从 <span id="week-start-date">2023-01-01</span> 到 <span id="week-end-date">2023-01-07</span></p>
+            </div>
+            <div class="week-navigation">
+                <button id="prev-week" class="nav-button">上一周</button>
+                <button id="current-week-btn" class="nav-button active">本周</button>
+                <button id="next-week" class="nav-button">下一周</button>
+            </div>
+        </section>
+
+        <section class="habits-container">
+            <div class="habits-header">
+                <h2>我的习惯</h2>
+                <button id="add-habit" class="primary-button">添加习惯</button>
+            </div>
+            
+            <div class="weekday-header">
+                <div class="habit-name">习惯名称</div>
+                <div class="weekday">周一</div>
+                <div class="weekday">周二</div>
+                <div class="weekday">周三</div>
+                <div class="weekday">周四</div>
+                <div class="weekday">周五</div>
+                <div class="weekday">周六</div>
+                <div class="weekday">周日</div>
+                <div class="habit-score">评分</div>
+                <div class="habit-actions">操作</div>
+            </div>
+            
+            <div id="habits-list">
+                <!-- 习惯列表将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <section class="weekly-summary">
+            <h2>本周总结</h2>
+            <div class="summary-content">
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-habits">0</div>
+                        <div class="stat-label">习惯总数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="completed-checkmarks">0</div>
+                        <div class="stat-label">已完成打卡</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="completion-rate">0%</div>
+                        <div class="stat-label">完成率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="average-score">0</div>
+                        <div class="stat-label">平均评分</div>
+                    </div>
+                </div>
+                <div class="weekly-chart">
+                    <canvas id="weekly-chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 添加习惯的模态框 -->
+    <div id="habit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">添加新习惯</h2>
+            <form id="habit-form">
+                <div class="form-group">
+                    <label for="habit-name">习惯名称</label>
+                    <input type="text" id="habit-name" placeholder="例如：晨跑、阅读、冥想..." required>
+                </div>
+                <div class="form-group">
+                    <label for="habit-description">描述（可选）</label>
+                    <textarea id="habit-description" placeholder="描述这个习惯的详情..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="habit-color">颜色标记</label>
+                    <input type="color" id="habit-color" value="#3498db">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="secondary-button" id="cancel-habit">取消</button>
+                    <button type="submit" class="primary-button" id="save-habit">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
