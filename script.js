@@ -1,5 +1,6 @@
 // 全局变量
 let habits = []; // 存储所有习惯
+let archivedHabits = []; // 存储已归档的习惯
 let currentWeekStart = getWeekStart(new Date()); // 当前周的开始日期
 let editingHabitId = null; // 当前正在编辑的习惯ID
 
@@ -22,15 +23,28 @@ const completedCheckmarksSpan = document.getElementById('completed-checkmarks');
 const completionRateSpan = document.getElementById('completion-rate');
 const averageScoreSpan = document.getElementById('average-score');
 const saveHabitBtn = document.getElementById('save-habit');
+const archivedCountSpan = document.getElementById('archived-count');
+const archivedHabitsGrid = document.getElementById('archived-habits-grid');
+const emptyArchivedDiv = document.getElementById('empty-archived');
+const navTabs = document.querySelectorAll('.nav-tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const certificateModal = document.getElementById('certificate-modal');
+const certificateContainer = document.getElementById('certificate-container');
+const downloadCertificateBtn = document.getElementById('download-certificate');
+const closeCertificateBtn = document.getElementById('close-certificate');
+const closeCertificateBtnAlt = document.getElementById('close-certificate-btn');
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM加载完成，初始化应用...');
     
     loadHabits();
+    loadArchivedHabits(); // 加载已归档的习惯
     updateWeekDisplay();
     renderHabits();
+    renderArchivedHabits(); // 渲染已归档习惯
     updateWeeklySummary();
+    updateArchivedCount(); // 更新归档习惯数量
     
     // 事件监听器
     if (addHabitBtn) {
@@ -68,10 +82,35 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWeekBtn.addEventListener('click', goToCurrentWeek);
     }
     
+    // 绑定导航标签事件
+    navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabId = tab.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+    
+    // 绑定证书模态框关闭事件
+    if (closeCertificateBtn) {
+        closeCertificateBtn.addEventListener('click', closeCertificateModal);
+    }
+    
+    if (closeCertificateBtnAlt) {
+        closeCertificateBtnAlt.addEventListener('click', closeCertificateModal);
+    }
+    
+    // 绑定下载证书事件
+    if (downloadCertificateBtn) {
+        downloadCertificateBtn.addEventListener('click', downloadCertificate);
+    }
+    
     // 点击模态框外部关闭
     window.addEventListener('click', (e) => {
         if (e.target === habitModal) {
             closeModal();
+        }
+        if (e.target === certificateModal) {
+            closeCertificateModal();
         }
     });
     
@@ -192,6 +231,23 @@ function loadHabits() {
     }
 }
 
+// 从localStorage加载已归档的习惯
+function loadArchivedHabits() {
+    try {
+        const savedArchivedHabits = localStorage.getItem('archivedHabits');
+        if (savedArchivedHabits) {
+            archivedHabits = JSON.parse(savedArchivedHabits);
+            console.log(`从localStorage加载了 ${archivedHabits.length} 个已归档习惯`);
+        } else {
+            console.log('localStorage中没有已归档的习惯数据');
+            archivedHabits = [];
+        }
+    } catch (error) {
+        console.error('加载已归档习惯数据时出错:', error);
+        archivedHabits = [];
+    }
+}
+
 // 保存习惯到localStorage
 function saveHabitsToStorage() {
     try {
@@ -200,6 +256,17 @@ function saveHabitsToStorage() {
     } catch (error) {
         console.error('保存习惯数据时出错:', error);
         alert('保存数据失败，请检查浏览器存储设置或清理浏览器缓存后重试。');
+    }
+}
+
+// 保存已归档习惯到localStorage
+function saveArchivedHabitsToStorage() {
+    try {
+        localStorage.setItem('archivedHabits', JSON.stringify(archivedHabits));
+        console.log(`已保存 ${archivedHabits.length} 个已归档习惯到localStorage`);
+    } catch (error) {
+        console.error('保存已归档习惯数据时出错:', error);
+        alert('保存归档数据失败，请检查浏览器存储设置或清理浏览器缓存后重试。');
     }
 }
 
@@ -330,6 +397,16 @@ function toggleCheckmark(habitId, dateStr) {
     
     // 重新计算历史最高记录
     recalculateWeeklyHighest(habit);
+    
+    // 计算连续天数
+    const streakInfo = calculateStreak(habit);
+    console.log(`习惯 ${habit.name} 当前连续天数: ${streakInfo.currentStreak}, 最长连续天数: ${streakInfo.longestStreak}`);
+    
+    // 如果连续天数达到21天，自动归档习惯
+    if (streakInfo.currentStreak >= 21) {
+        archiveHabit(habit, streakInfo);
+        return; // 已归档，不需要继续更新
+    }
     
     // 确保保存到localStorage
     saveHabitsToStorage();
@@ -637,4 +714,390 @@ function getRandomColor() {
         '#AF52DE'  // 粉色
     ];
     return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// 计算习惯的连续打卡天数
+function calculateStreak(habit) {
+    if (!habit.checkmarks) {
+        return { currentStreak: 0, longestStreak: 0 };
+    }
+    
+    // 获取所有打卡日期并排序
+    const checkDates = Object.keys(habit.checkmarks)
+        .filter(date => habit.checkmarks[date])
+        .sort();
+    
+    if (checkDates.length === 0) {
+        return { currentStreak: 0, longestStreak: 0 };
+    }
+    
+    // 计算当前连续天数
+    let currentStreak = 1;
+    let longestStreak = 1;
+    const today = formatDate(new Date());
+    const yesterday = formatDate(new Date(Date.now() - 86400000));
+    
+    // 检查最后一次打卡是否是今天或昨天
+    const lastCheckDate = checkDates[checkDates.length - 1];
+    if (lastCheckDate !== today && lastCheckDate !== yesterday) {
+        // 如果最后一次打卡不是今天或昨天，当前连续天数为0
+        return { currentStreak: 0, longestStreak: calculateLongestStreak(checkDates) };
+    }
+    
+    // 从最后一次打卡开始向前计算连续天数
+    for (let i = checkDates.length - 1; i > 0; i--) {
+        const currentDate = new Date(checkDates[i]);
+        const prevDate = new Date(checkDates[i - 1]);
+        
+        // 计算日期差
+        const diffTime = currentDate - prevDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            // 连续打卡
+            currentStreak++;
+        } else {
+            // 连续中断
+            break;
+        }
+    }
+    
+    // 计算历史最长连续天数
+    longestStreak = Math.max(currentStreak, calculateLongestStreak(checkDates));
+    
+    return { currentStreak, longestStreak };
+}
+
+// 计算历史最长连续打卡天数
+function calculateLongestStreak(checkDates) {
+    let longestStreak = 1;
+    let currentStreak = 1;
+    
+    for (let i = 1; i < checkDates.length; i++) {
+        const currentDate = new Date(checkDates[i]);
+        const prevDate = new Date(checkDates[i - 1]);
+        
+        // 计算日期差
+        const diffTime = currentDate - prevDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            // 连续打卡
+            currentStreak++;
+            longestStreak = Math.max(longestStreak, currentStreak);
+        } else {
+            // 连续中断
+            currentStreak = 1;
+        }
+    }
+    
+    return longestStreak;
+}
+
+// 归档习惯
+function archiveHabit(habit, streakInfo) {
+    console.log(`归档习惯: ${habit.name}, 连续完成天数: ${streakInfo.currentStreak}`);
+    
+    // 创建归档记录
+    const archivedHabit = {
+        id: habit.id,
+        name: habit.name,
+        description: habit.description,
+        color: habit.color,
+        archivedDate: formatDate(new Date()),
+        streak: streakInfo.currentStreak,
+        longestStreak: streakInfo.longestStreak
+    };
+    
+    // 添加到归档列表
+    archivedHabits.push(archivedHabit);
+    
+    // 从活跃习惯列表中移除
+    habits = habits.filter(h => h.id !== habit.id);
+    
+    // 保存到localStorage
+    saveHabitsToStorage();
+    saveArchivedHabitsToStorage();
+    
+    // 显示祝贺消息
+    showArchiveNotification(archivedHabit);
+    
+    // 更新UI
+    renderHabits();
+    renderArchivedHabits();
+    updateWeeklySummary();
+    updateArchivedCount();
+}
+
+// 显示习惯归档通知
+function showArchiveNotification(archivedHabit) {
+    // 创建通知元素
+    const notification = document.createElement('div');
+    notification.className = 'archive-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <h3>🎉 恭喜你！</h3>
+            <p>你已经连续 <strong>${archivedHabit.streak}</strong> 天完成了 <strong>${archivedHabit.name}</strong> 习惯！</p>
+            <p>这个习惯已经成功养成并归档。继续保持！</p>
+            <button class="close-notification">知道了</button>
+        </div>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(notification);
+    
+    // 添加关闭按钮事件
+    const closeButton = notification.querySelector('.close-notification');
+    closeButton.addEventListener('click', function() {
+        document.body.removeChild(notification);
+    });
+    
+    // 5秒后自动关闭
+    setTimeout(() => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+    }, 5000);
+}
+
+// 切换标签页
+function switchTab(tabId) {
+    // 移除所有标签的active类
+    navTabs.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // 移除所有内容的active类
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // 添加active类到选中的标签和内容
+    document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById(`${tabId}-page`).classList.add('active');
+}
+
+// 更新归档习惯数量
+function updateArchivedCount() {
+    if (archivedCountSpan) {
+        archivedCountSpan.textContent = archivedHabits.length;
+    }
+}
+
+// 渲染已归档习惯
+function renderArchivedHabits() {
+    if (!archivedHabitsGrid) return;
+    
+    archivedHabitsGrid.innerHTML = '';
+    
+    if (archivedHabits.length === 0) {
+        if (emptyArchivedDiv) {
+            emptyArchivedDiv.style.display = 'block';
+        }
+        return;
+    }
+    
+    if (emptyArchivedDiv) {
+        emptyArchivedDiv.style.display = 'none';
+    }
+    
+    archivedHabits.forEach(habit => {
+        const card = document.createElement('div');
+        card.className = 'archived-card';
+        
+        // 卡片头部
+        const header = document.createElement('div');
+        header.className = 'archived-card-header';
+        
+        const title = document.createElement('div');
+        title.className = 'archived-card-title';
+        
+        const colorSpan = document.createElement('span');
+        colorSpan.className = 'archived-color';
+        colorSpan.style.backgroundColor = habit.color;
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'archived-name';
+        nameSpan.textContent = habit.name;
+        
+        title.appendChild(colorSpan);
+        title.appendChild(nameSpan);
+        
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'archived-date';
+        dateSpan.textContent = `归档于 ${habit.archivedDate}`;
+        
+        header.appendChild(title);
+        header.appendChild(dateSpan);
+        
+        // 卡片内容
+        const body = document.createElement('div');
+        body.className = 'archived-card-body';
+        
+        if (habit.description) {
+            const description = document.createElement('div');
+            description.className = 'archived-description';
+            description.textContent = habit.description;
+            body.appendChild(description);
+        }
+        
+        const stats = document.createElement('div');
+        stats.className = 'archived-stats';
+        
+        const streakStat = document.createElement('div');
+        streakStat.className = 'archived-stat';
+        
+        const streakValue = document.createElement('div');
+        streakValue.className = 'archived-stat-value';
+        streakValue.textContent = habit.streak;
+        
+        const streakLabel = document.createElement('div');
+        streakLabel.className = 'archived-stat-label';
+        streakLabel.textContent = '连续天数';
+        
+        streakStat.appendChild(streakValue);
+        streakStat.appendChild(streakLabel);
+        
+        const longestStreakStat = document.createElement('div');
+        longestStreakStat.className = 'archived-stat';
+        
+        const longestStreakValue = document.createElement('div');
+        longestStreakValue.className = 'archived-stat-value';
+        longestStreakValue.textContent = habit.longestStreak || habit.streak;
+        
+        const longestStreakLabel = document.createElement('div');
+        longestStreakLabel.className = 'archived-stat-label';
+        longestStreakLabel.textContent = '最长连续';
+        
+        longestStreakStat.appendChild(longestStreakValue);
+        longestStreakStat.appendChild(longestStreakLabel);
+        
+        stats.appendChild(streakStat);
+        stats.appendChild(longestStreakStat);
+        
+        body.appendChild(stats);
+        
+        // 卡片操作
+        const actions = document.createElement('div');
+        actions.className = 'archived-card-actions';
+        
+        const restoreButton = document.createElement('button');
+        restoreButton.className = 'archived-button restore-button';
+        restoreButton.textContent = '恢复习惯';
+        restoreButton.addEventListener('click', () => {
+            restoreHabit(habit.id);
+        });
+        
+        const certificateButton = document.createElement('button');
+        certificateButton.className = 'archived-button certificate-button';
+        certificateButton.textContent = '查看证书';
+        certificateButton.addEventListener('click', () => {
+            showCertificate(habit);
+        });
+        
+        actions.appendChild(restoreButton);
+        actions.appendChild(certificateButton);
+        
+        // 组装卡片
+        card.appendChild(header);
+        card.appendChild(body);
+        card.appendChild(actions);
+        
+        archivedHabitsGrid.appendChild(card);
+    });
+}
+
+// 恢复已归档习惯
+function restoreHabit(habitId) {
+    const habitIndex = archivedHabits.findIndex(h => h.id === habitId);
+    if (habitIndex === -1) return;
+    
+    const habit = archivedHabits[habitIndex];
+    
+    // 创建新的活跃习惯
+    const restoredHabit = {
+        id: Date.now().toString(), // 生成新ID避免冲突
+        name: habit.name,
+        description: habit.description,
+        color: habit.color,
+        checkmarks: {}, // 重置打卡记录
+        weeklyHighest: 0,
+        weeklyTarget: 1,
+        weeklyRecords: {}
+    };
+    
+    // 添加到活跃习惯列表
+    habits.push(restoredHabit);
+    
+    // 从归档列表中移除
+    archivedHabits.splice(habitIndex, 1);
+    
+    // 保存到localStorage
+    saveHabitsToStorage();
+    saveArchivedHabitsToStorage();
+    
+    // 更新UI
+    renderHabits();
+    renderArchivedHabits();
+    updateWeeklySummary();
+    updateArchivedCount();
+    
+    // 显示成功消息
+    alert(`习惯"${habit.name}"已成功恢复！`);
+}
+
+// 显示习惯证书
+function showCertificate(habit) {
+    if (!certificateContainer || !certificateModal) return;
+    
+    // 创建证书HTML
+    const certificateHTML = `
+        <div class="certificate">
+            <div class="certificate-border"></div>
+            <div class="certificate-content">
+                <div class="certificate-title">习惯养成证书</div>
+                <div class="certificate-subtitle">特此证明</div>
+                <div class="certificate-name">${habit.name}</div>
+                <div class="certificate-text">
+                    已经成功养成，连续坚持了 <strong>${habit.streak}</strong> 天，
+                    <br>展现了非凡的毅力和自律精神。
+                </div>
+                <div class="certificate-streak">🏆 ${habit.streak} 天连续打卡 🏆</div>
+                <div class="certificate-date">归档日期：${habit.archivedDate}</div>
+                <div class="certificate-signature">习惯打卡</div>
+                <div class="certificate-app-name">习惯打卡应用</div>
+            </div>
+            <div class="certificate-seal">✓</div>
+        </div>
+    `;
+    
+    certificateContainer.innerHTML = certificateHTML;
+    certificateModal.style.display = 'flex';
+    
+    // 保存当前习惯ID用于下载
+    downloadCertificateBtn.setAttribute('data-habit-id', habit.id);
+}
+
+// 关闭证书模态框
+function closeCertificateModal() {
+    if (certificateModal) {
+        certificateModal.style.display = 'none';
+    }
+}
+
+// 下载证书
+function downloadCertificate() {
+    const habitId = downloadCertificateBtn.getAttribute('data-habit-id');
+    const habit = archivedHabits.find(h => h.id === habitId);
+    
+    if (!habit || !certificateContainer) return;
+    
+    // 使用html2canvas库将证书转换为图片
+    html2canvas(certificateContainer.querySelector('.certificate')).then(canvas => {
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.download = `${habit.name}-习惯养成证书.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
 } 

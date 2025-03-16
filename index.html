@@ -13,79 +13,121 @@
         <header>
             <h1>习惯打卡</h1>
             <p class="subtitle">养成好习惯，每周记录你的进步</p>
+            
+            <!-- 导航标签 -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="active-habits">活跃习惯</button>
+                <button class="nav-tab" data-tab="archived-habits">已归档习惯</button>
+            </div>
         </header>
 
-        <section class="week-info">
-            <div class="week-display">
-                <h2>第 <span id="current-week">1</span> 周</h2>
-                <p>从 <span id="week-start-date">2023-01-01</span> 到 <span id="week-end-date">2023-01-07</span></p>
+        <!-- 成就统计 -->
+        <div class="achievement-banner">
+            <div class="achievement-icon">🏆</div>
+            <div class="achievement-text">
+                <p>你已经成功养成了 <span id="archived-count">0</span> 个习惯！</p>
+                <p class="achievement-subtitle">继续保持，挑战更多！</p>
             </div>
-            <div class="week-navigation">
-                <button id="prev-week" class="nav-button">上一周</button>
-                <button id="current-week-btn" class="nav-button active">本周</button>
-                <button id="next-week" class="nav-button">下一周</button>
-            </div>
-        </section>
+        </div>
 
-        <section class="habits-container">
-            <div class="habits-header">
-                <h2>我的习惯</h2>
-                <button id="add-habit" class="primary-button">添加习惯</button>
-            </div>
-            
-            <div class="weekday-header">
-                <div class="habit-name">习惯名称</div>
-                <div class="weekday">周一</div>
-                <div class="weekday">周二</div>
-                <div class="weekday">周三</div>
-                <div class="weekday">周四</div>
-                <div class="weekday">周五</div>
-                <div class="weekday">周六</div>
-                <div class="weekday">周日</div>
-                <div class="habit-target">目标</div>
-                <div class="habit-actions">操作</div>
-            </div>
-            
-            <div id="habits-list">
-                <!-- 习惯列表将通过JavaScript动态生成 -->
-            </div>
-        </section>
+        <!-- 活跃习惯页面 -->
+        <div id="active-habits-page" class="tab-content active">
+            <section class="week-info">
+                <div class="week-display">
+                    <h2>第 <span id="current-week">1</span> 周</h2>
+                    <p>从 <span id="week-start-date">2023-01-01</span> 到 <span id="week-end-date">2023-01-07</span></p>
+                </div>
+                <div class="week-navigation">
+                    <button id="prev-week" class="nav-button">上一周</button>
+                    <button id="current-week-btn" class="nav-button active">本周</button>
+                    <button id="next-week" class="nav-button">下一周</button>
+                </div>
+            </section>
 
-        <!-- 周总结 -->
-        <div class="weekly-summary">
-            <h2>本周总结</h2>
-            <div class="summary-grid">
-                <div class="summary-item">
-                    <div class="summary-value" id="total-habits">0</div>
-                    <div class="summary-label">习惯总数</div>
+            <section class="habits-container">
+                <div class="habits-header">
+                    <h2>我的习惯</h2>
+                    <button id="add-habit" class="primary-button">添加习惯</button>
                 </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="completed-checkmarks">0</div>
-                    <div class="summary-label">完成打卡</div>
+                
+                <div class="weekday-header">
+                    <div class="habit-name">习惯名称</div>
+                    <div class="weekday">周一</div>
+                    <div class="weekday">周二</div>
+                    <div class="weekday">周三</div>
+                    <div class="weekday">周四</div>
+                    <div class="weekday">周五</div>
+                    <div class="weekday">周六</div>
+                    <div class="weekday">周日</div>
+                    <div class="habit-target">目标</div>
+                    <div class="habit-actions">操作</div>
                 </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="completion-rate">0%</div>
-                    <div class="summary-label">完成率</div>
+                
+                <div id="habits-list">
+                    <!-- 习惯列表将通过JavaScript动态生成 -->
                 </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="target-rate">0%</div>
-                    <div class="summary-label">目标达成率</div>
+            </section>
+
+            <!-- 周总结 -->
+            <div class="weekly-summary">
+                <h2>本周总结</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="total-habits">0</div>
+                        <div class="summary-label">习惯总数</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="completed-checkmarks">0</div>
+                        <div class="summary-label">完成打卡</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="completion-rate">0%</div>
+                        <div class="summary-label">完成率</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="target-rate">0%</div>
+                        <div class="summary-label">目标达成率</div>
+                    </div>
+                </div>
+                <div class="summary-progress">
+                    <div class="progress-label">本周进度</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="week-progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        已完成 <span id="week-progress-text">0%</span>
+                    </div>
                 </div>
             </div>
-            <div class="summary-progress">
-                <div class="progress-label">本周进度</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="week-progress-fill"></div>
+
+            <!-- 目标信息提示 -->
+            <div class="target-info">
+                <div class="info-message">
+                    <p>系统会自动记录你每周的最高完成次数，并将其设为下周的目标，鼓励你不断挑战自我！</p>
                 </div>
-                <div class="progress-text">
-                    已完成 <span id="week-progress-text">0%</span>
+                <div class="info-message">
+                    <p>当你连续21天完成一个习惯时，它将被自动归档，表示你已经成功养成了这个习惯！</p>
                 </div>
             </div>
         </div>
 
-        <!-- 目标信息提示 -->
-        <div class="target-info">
-            <p>系统会自动记录你每周的最高完成次数，并将其设为下周的目标，鼓励你不断挑战自我！</p>
+        <!-- 已归档习惯页面 -->
+        <div id="archived-habits-page" class="tab-content">
+            <div class="archived-header">
+                <h2>已归档习惯</h2>
+                <p class="archived-subtitle">这些是你已经成功养成的习惯，恭喜你！</p>
+            </div>
+            
+            <div class="archived-grid" id="archived-habits-grid">
+                <!-- 归档习惯卡片将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="empty-archived" id="empty-archived">
+                <div class="empty-icon">📝</div>
+                <h3>暂无归档习惯</h3>
+                <p>当你连续21天完成一个习惯时，它将被自动归档到这里。</p>
+                <p>继续坚持，你会看到成果的！</p>
+            </div>
         </div>
     </div>
 
@@ -115,6 +157,21 @@
         </div>
     </div>
 
+    <!-- 习惯证书模态框 -->
+    <div id="certificate-modal" class="modal">
+        <div class="modal-content certificate-modal-content">
+            <span class="close-modal" id="close-certificate">&times;</span>
+            <div id="certificate-container">
+                <!-- 证书内容将通过JavaScript动态生成 -->
+            </div>
+            <div class="certificate-actions">
+                <button id="download-certificate" class="primary-button">下载证书</button>
+                <button id="close-certificate-btn" class="secondary-button">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </body>
 </html> 
