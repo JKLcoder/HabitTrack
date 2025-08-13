@@ -1832,8 +1832,18 @@
                     console.warn('获取用户设置失败:', settingsError);
                 }
                 
-                // 更新本地数据
-                schedules = schedulesData || [];
+                // 更新本地数据 - 确保字段名一致
+                if (schedulesData && schedulesData.length > 0) {
+                    schedules = schedulesData.map(serverSchedule => ({
+                        dayId: serverSchedule.day_id,  // 数据库字段 -> 本地字段
+                        date: serverSchedule.date,
+                        weekday: serverSchedule.weekday,
+                        items: serverSchedule.items || [],
+                        createdAt: serverSchedule.created_at
+                    }));
+                } else {
+                    schedules = [];
+                }
                 
                 // 更新模板
                 if (templatesData && templatesData.length > 0) {
@@ -1925,27 +1935,45 @@
         async function saveSchedulesToSupabase() {
             if (!currentUser) return;
             
+            console.log('开始保存日程到Supabase，当前日程数量:', schedules.length);
+            
             // 获取所有需要同步的日程
             for (const schedule of schedules) {
                 try {
+                    console.log('正在保存日程:', schedule);
+                    
+                    // 检查必要字段
+                    if (!schedule.dayId) {
+                        console.error('日程缺少dayId字段:', schedule);
+                        continue;
+                    }
+                    
                     // 检查数据库中是否已存在这个日程
-                    const { data: existingSchedule } = await supabaseClient
+                    const { data: existingSchedule, error: checkError } = await supabaseClient
                         .from('schedules')
                         .select('id, updated_at')
                         .eq('user_id', currentUser.id)
                         .eq('day_id', schedule.dayId)
                         .single();
                     
+                    if (checkError && !checkError.message.includes('No rows returned')) {
+                        console.error('检查现有日程时出错:', checkError);
+                        throw checkError;
+                    }
+                    
                     const scheduleData = {
                         user_id: currentUser.id,
                         day_id: schedule.dayId,
                         date: schedule.date,
                         weekday: schedule.weekday,
-                        items: schedule.items
+                        items: schedule.items || []
                     };
+                    
+                    console.log('准备保存的数据:', scheduleData);
                     
                     if (existingSchedule) {
                         // 更新现有日程
+                        console.log('更新现有日程:', existingSchedule.id);
                         const { error } = await supabaseClient
                             .from('schedules')
                             .update(scheduleData)
@@ -1954,17 +1982,23 @@
                         if (error) throw error;
                     } else {
                         // 创建新日程
+                        console.log('创建新日程');
                         const { error } = await supabaseClient
                             .from('schedules')
                             .insert([scheduleData]);
                         
                         if (error) throw error;
                     }
+                    
+                    console.log('日程保存成功:', schedule.dayId);
+                    
                 } catch (error) {
                     console.error(`保存日程 ${schedule.dayId} 失败:`, error);
                     throw error;
                 }
             }
+            
+            console.log('所有日程保存完成');
         }
         
         async function saveUserSettingsToSupabase() {
@@ -2106,14 +2140,23 @@
                         
                         if (schedulesToMigrate.length > 0) {
                             console.log('需要迁移的日程:', schedulesToMigrate.length, '条');
+                            console.log('迁移数据详情:', schedulesToMigrate);
                             
-                            const scheduleData = schedulesToMigrate.map(schedule => ({
-                                user_id: currentUser.id,
-                                day_id: schedule.dayId,
-                                date: schedule.date,
-                                weekday: schedule.weekday,
-                                items: schedule.items || []
-                            }));
+                            const scheduleData = schedulesToMigrate.map(schedule => {
+                                // 确保所有必需字段都存在
+                                if (!schedule.dayId) {
+                                    console.error('日程缺少dayId:', schedule);
+                                }
+                                return {
+                                    user_id: currentUser.id,
+                                    day_id: schedule.dayId,
+                                    date: schedule.date,
+                                    weekday: schedule.weekday,
+                                    items: schedule.items || []
+                                };
+                            });
+                            
+                            console.log('准备插入的数据:', scheduleData);
                             
                             const { error } = await supabaseClient
                                 .from('schedules')
