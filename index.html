@@ -1604,14 +1604,20 @@
                 await handleAuthSuccess(session.user);
             } else {
                 showAuthModal();
+                // 如果没有用户会话，加载本地数据作为fallback
+                loadFromLocalStorage();
+                loadTemplatesFromStorage();
+                renderCalendar();
+                renderScheduleForDate();
+                updateTemplateListDisplay();
             }
             
             // 监听认证状态变化
-            supabaseClient.auth.onAuthStateChange((event, session) => {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('认证状态变化:', event, session?.user?.email);
                 
                 if (event === 'SIGNED_IN' && session?.user) {
-                    handleAuthSuccess(session.user);
+                    await handleAuthSuccess(session.user);
                 } else if (event === 'SIGNED_OUT') {
                     handleAuthLogout();
                 }
@@ -1793,7 +1799,15 @@
                     .eq('user_id', currentUser.id)
                     .order('day_id', { ascending: false });
                 
-                if (schedulesError) throw schedulesError;
+                if (schedulesError) {
+                    if (schedulesError.message.includes('relation') && schedulesError.message.includes('does not exist')) {
+                        console.error('数据库表不存在，请先创建数据库表');
+                        showNotification('数据库未初始化，请先创建数据库表', false);
+                        updateSyncStatus('offline', '需要初始化');
+                        return;
+                    }
+                    throw schedulesError;
+                }
                 
                 // 获取用户的模板数据
                 const { data: templatesData, error: templatesError } = await supabaseClient
@@ -1801,7 +1815,10 @@
                     .select('*')
                     .eq('user_id', currentUser.id);
                 
-                if (templatesError) throw templatesError;
+                // 模板错误不是致命的，可以忽略
+                if (templatesError && !templatesError.message.includes('does not exist')) {
+                    console.warn('获取模板数据失败:', templatesError);
+                }
                 
                 // 获取用户设置
                 const { data: settingsData, error: settingsError } = await supabaseClient
@@ -1810,18 +1827,21 @@
                     .eq('user_id', currentUser.id)
                     .single();
                 
-                // 设置错误不是致命错误，可以忽略
+                // 设置错误也不是致命错误
+                if (settingsError && !settingsError.message.includes('does not exist')) {
+                    console.warn('获取用户设置失败:', settingsError);
+                }
                 
                 // 更新本地数据
                 schedules = schedulesData || [];
                 
                 // 更新模板
-                if (templatesData) {
+                if (templatesData && templatesData.length > 0) {
                     templatesData.forEach(template => {
                         if (template.template_type === 'workday') {
-                            workdayTemplate = template.template_data;
+                            workdayTemplate = template.template_data || {};
                         } else if (template.template_type === 'nonworkday') {
-                            nonWorkdayTemplate = template.template_data;
+                            nonWorkdayTemplate = template.template_data || {};
                         }
                     });
                 }
@@ -1835,14 +1855,11 @@
                         localStorage.setItem('calendarTheme', newTheme);
                     }
                     
-                    if (settingsData.current_date) {
-                        const dateData = settingsData.current_date;
+                    if (settingsData.current_date_data) {
+                        const dateData = settingsData.current_date_data;
                         currentDate = new Date(dateData.year, dateData.month, dateData.day);
                     }
                 }
-                
-                // 处理离线期间的变更
-                await processPendingChanges();
                 
                 // 重新渲染界面
                 renderCalendar();
@@ -1850,19 +1867,29 @@
                 updateTemplateListDisplay();
                 
                 updateSyncStatus('', '已同步');
-                console.log('数据同步完成');
+                console.log('数据同步完成，获取到', schedules.length, '条日程');
                 
             } catch (error) {
                 console.error('数据同步失败:', error);
                 updateSyncStatus('offline', '同步失败');
-                showNotification('数据同步失败，将使用离线模式', false);
+                
+                // 提供详细错误信息
+                if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                    console.error('⚠️ 数据库表不存在！请在Supabase控制台运行以下SQL脚本：');
+                    console.error('请查看README-supabase.md文件中的SQL脚本');
+                    showNotification('请先在Supabase中创建数据库表', false);
+                } else {
+                    showNotification('数据同步失败：' + error.message, false);
+                }
             }
         }
         
         async function saveToSupabase() {
+            // 总是先保存到本地存储，确保数据不丢失
+            saveToLocalStorage();
+            
             if (!currentUser || !isOnline) {
-                // 离线模式：保存到本地
-                saveToLocalStorage();
+                console.log('用户未登录或离线，数据已保存到本地');
                 return;
             }
             
@@ -1876,12 +1903,22 @@
                 await saveUserSettingsToSupabase();
                 
                 updateSyncStatus('', '已同步');
+                console.log('数据已同步到云端');
                 
             } catch (error) {
                 console.error('保存到Supabase失败:', error);
-                updateSyncStatus('offline', '保存失败');
-                saveToLocalStorage(); // fallback to local storage
-                showNotification('数据保存失败，已保存到本地', false);
+                updateSyncStatus('offline', '同步失败');
+                
+                // 提供详细错误信息
+                if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                    showNotification('数据库表未创建，请先运行SQL脚本', false);
+                    console.error('请在Supabase控制台运行README中的SQL脚本创建数据库表');
+                } else if (error.message.includes('new row violates row-level security policy')) {
+                    showNotification('数据库权限配置错误', false);
+                    console.error('请检查Supabase行级安全策略配置');
+                } else {
+                    showNotification('数据同步失败，已保存到本地: ' + error.message, false);
+                }
             }
         }
         
@@ -1937,7 +1974,7 @@
                 const settingsData = {
                     user_id: currentUser.id,
                     theme: document.body.getAttribute('data-theme') || 'light',
-                    current_date: {
+                    current_date_data: {
                         year: currentDate.getFullYear(),
                         month: currentDate.getMonth(),
                         day: currentDate.getDate()
@@ -2023,7 +2060,10 @@
         // ==================== 数据迁移功能 ====================
         
         async function migrateFromLocalStorage() {
-            if (!currentUser) return;
+            if (!currentUser) {
+                showNotification('请先登录才能迁移数据', false);
+                return;
+            }
             
             console.log('开始数据迁移...');
             updateSyncStatus('syncing', '迁移数据中...');
@@ -2042,34 +2082,46 @@
                     const parsedSchedules = JSON.parse(localSchedules);
                     console.log('发现本地日程数据:', parsedSchedules.length, '条');
                     
-                    // 检查云端是否已有数据
-                    const { data: existingSchedules } = await supabaseClient
-                        .from('schedules')
-                        .select('day_id')
-                        .eq('user_id', currentUser.id);
-                    
-                    const existingDayIds = new Set(existingSchedules?.map(s => s.day_id) || []);
-                    
-                    // 只迁移云端没有的数据
-                    const schedulesToMigrate = parsedSchedules.filter(s => !existingDayIds.has(s.dayId));
-                    
-                    if (schedulesToMigrate.length > 0) {
-                        console.log('需要迁移的日程:', schedulesToMigrate.length, '条');
-                        
-                        const scheduleData = schedulesToMigrate.map(schedule => ({
-                            user_id: currentUser.id,
-                            day_id: schedule.dayId,
-                            date: schedule.date,
-                            weekday: schedule.weekday,
-                            items: schedule.items
-                        }));
-                        
-                        const { error } = await supabaseClient
+                    if (parsedSchedules.length > 0) {
+                        // 检查云端是否已有数据
+                        const { data: existingSchedules, error: checkError } = await supabaseClient
                             .from('schedules')
-                            .insert(scheduleData);
+                            .select('day_id')
+                            .eq('user_id', currentUser.id);
                         
-                        if (error) throw error;
-                        migratedCount += schedulesToMigrate.length;
+                        if (checkError) {
+                            if (checkError.message.includes('relation') && checkError.message.includes('does not exist')) {
+                                showNotification('数据库表未创建，无法迁移数据', false);
+                                console.error('请先在Supabase控制台运行SQL脚本创建数据库表');
+                                updateSyncStatus('offline', '迁移失败');
+                                return;
+                            }
+                            throw checkError;
+                        }
+                        
+                        const existingDayIds = new Set(existingSchedules?.map(s => s.day_id) || []);
+                        
+                        // 只迁移云端没有的数据
+                        const schedulesToMigrate = parsedSchedules.filter(s => !existingDayIds.has(s.dayId));
+                        
+                        if (schedulesToMigrate.length > 0) {
+                            console.log('需要迁移的日程:', schedulesToMigrate.length, '条');
+                            
+                            const scheduleData = schedulesToMigrate.map(schedule => ({
+                                user_id: currentUser.id,
+                                day_id: schedule.dayId,
+                                date: schedule.date,
+                                weekday: schedule.weekday,
+                                items: schedule.items || []
+                            }));
+                            
+                            const { error } = await supabaseClient
+                                .from('schedules')
+                                .insert(scheduleData);
+                            
+                            if (error) throw error;
+                            migratedCount += schedulesToMigrate.length;
+                        }
                     }
                 }
                 
@@ -2104,8 +2156,11 @@
                             .from('templates')
                             .upsert(templatesData, { onConflict: 'user_id,template_type' });
                         
-                        if (error) throw error;
-                        console.log('模板数据迁移完成');
+                        if (error && !error.message.includes('does not exist')) {
+                            console.warn('模板迁移失败:', error);
+                        } else {
+                            console.log('模板数据迁移完成');
+                        }
                     }
                 }
                 
@@ -2113,7 +2168,7 @@
                 const settingsData = {
                     user_id: currentUser.id,
                     theme: localTheme || 'light',
-                    current_date: {
+                    current_date_data: {
                         year: currentDate.getFullYear(),
                         month: currentDate.getMonth(),
                         day: currentDate.getDate()
@@ -2124,12 +2179,16 @@
                     .from('user_settings')
                     .upsert([settingsData], { onConflict: 'user_id' });
                 
-                if (settingsError) throw settingsError;
+                if (settingsError && !settingsError.message.includes('does not exist')) {
+                    console.warn('用户设置迁移失败:', settingsError);
+                }
                 
                 if (migratedCount > 0) {
                     showNotification(`数据迁移完成！迁移了${migratedCount}条日程`, true);
+                    // 迁移成功后重新同步数据
+                    await syncDataFromServer();
                 } else {
-                    console.log('没有需要迁移的数据');
+                    showNotification('没有需要迁移的数据', true);
                 }
                 
                 updateSyncStatus('', '迁移完成');
@@ -2137,7 +2196,14 @@
             } catch (error) {
                 console.error('数据迁移失败:', error);
                 updateSyncStatus('offline', '迁移失败');
-                showNotification('数据迁移失败：' + error.message, false);
+                
+                if (error.message.includes('relation') && error.message.includes('does not exist')) {
+                    showNotification('数据库表未创建，请先运行SQL脚本', false);
+                } else if (error.message.includes('new row violates row-level security policy')) {
+                    showNotification('数据库权限配置错误，请检查RLS策略', false);
+                } else {
+                    showNotification('数据迁移失败：' + error.message, false);
+                }
             }
         }
         
