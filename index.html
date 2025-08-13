@@ -3,175 +3,2269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>习惯打卡</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- 添加苹果风格图标 -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✓</text></svg>">
+    <title>智能日程管理 - 日历视图版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 主色调升级 */
+            --primary-50: #f0f4ff;
+            --primary-100: #e0edff;
+            --primary-400: #6366f1;
+            --primary-500: #4361ee;
+            --primary-600: #3f37c9;
+            --primary-700: #2d1b69;
+            
+            /* 语义化色彩 */
+            --success-light: #e8f5e9;
+            --success-main: #4caf50;
+            --success-dark: #2e7d32;
+            --warning-light: #fff3cd;
+            --warning-main: #ff9800;
+            --danger-main: #f44336;
+            
+            /* 中性色调优化 */
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #eeeeee;
+            --gray-300: #e0e0e0;
+            --gray-400: #bdbdbd;
+            --gray-500: #9e9e9e;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-900: #212529;
+            
+            /* 兼容旧变量 */
+            --primary-color: var(--primary-500);
+            --secondary-color: var(--primary-600);
+            --accent-color: #4cc9f0;
+            --success-color: var(--success-main);
+            --completed-bg: var(--success-light);
+            --recurring-bg: var(--primary-50);
+            --master-bg: #fff9e6;
+            --danger-color: var(--danger-main);
+            --light-color: var(--gray-50);
+            --dark-color: var(--gray-900);
+            --gray-color: var(--gray-600);
+            --border-radius: 8px;
+            --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: '等线', sans-serif;
+            line-height: 1.4;
+            background-color: #f0f2f5;
+            color: var(--dark-color);
+            padding: 12px;
+            margin: 0;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--gray-color);
+            font-weight: 300;
+            font-size: 0.9rem;
+        }
+
+        /* 主要布局容器 */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+            min-height: 600px;
+        }
+
+        /* 左侧日历面板 */
+        .calendar-panel {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(67, 97, 238, 0.08);
+            overflow-y: auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-year {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-50);
+            transform: scale(1.1);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header-cell {
+            text-align: center;
+            padding: 8px 4px;
+            font-weight: 600;
+            color: var(--gray-600);
+            font-size: 0.85rem;
+        }
+
+        .calendar-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            position: relative;
+            min-height: 36px;
+        }
+
+        .calendar-cell:hover {
+            background: var(--primary-50);
+        }
+
+        .calendar-cell.other-month {
+            color: var(--gray-400);
+        }
+
+        .calendar-cell.today {
+            background: var(--primary-500);
+            color: white;
+            font-weight: 600;
+            position: relative;
+        }
+
+        /* 今日任务完成度颜色覆盖 */
+        .calendar-cell.today.completion-0 { 
+            background: #dc2626; /* 红色：今日无任务或0%完成 */
+            color: white;
+        }
+        
+        .calendar-cell.today.completion-low { 
+            background: #ea580c; /* 橙红色：今日1-30%完成 */
+            color: white;
+        }
+        
+        .calendar-cell.today.completion-medium { 
+            background: #ca8a04; /* 黄色：今日31-70%完成 */
+            color: white;
+        }
+        
+        .calendar-cell.today.completion-high { 
+            background: #9333ea; /* 紫色：今日71-99%完成 */
+            color: white;
+        }
+        
+        .calendar-cell.today.completion-full { 
+            background: #16a34a; /* 绿色：今日100%完成 */
+            color: white;
+        }
+
+        .calendar-cell.selected {
+            background: var(--primary-600);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 日历单元格完成度颜色 */
+        .calendar-cell.completion-0 { /* 无任务或0%完成 */
+            background: var(--gray-100);
+        }
+        
+        .calendar-cell.completion-low { /* 1-30%完成 */
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .calendar-cell.completion-medium { /* 31-70%完成 */
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .calendar-cell.completion-high { /* 71-99%完成 */
+            background: #ddd6fe;
+            color: #7c3aed;
+        }
+        
+        .calendar-cell.completion-full { /* 100%完成 */
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        /* 快速操作按钮 */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.02em;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-500);
+            border: 1.5px solid rgba(67, 97, 238, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gray-600) 0%, var(--gray-700) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-main) 0%, #d32f2f 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 模板管理样式 */
+        .template-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .template-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .template-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* 模板设置窗口样式 */
+        .template-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .template-modal.show {
+            display: flex;
+        }
+
+        .template-modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .template-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .template-modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .template-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .template-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .template-modal-body {
+            padding: 24px;
+        }
+
+        .template-tabs {
+            display: flex;
+            margin-bottom: 24px;
+            border-radius: var(--border-radius);
+            background: var(--gray-100);
+            padding: 4px;
+        }
+
+        .template-tab {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            border-radius: calc(var(--border-radius) - 2px);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: var(--gray-600);
+        }
+
+        .template-tab.active {
+            background: var(--primary-500);
+            color: white;
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.3);
+        }
+
+        .template-content {
+            display: none;
+        }
+
+        .template-content.active {
+            display: block;
+        }
+
+        .template-time-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .template-time-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: var(--gray-50);
+            border-radius: 6px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .template-time-label {
+            width: 60px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .template-task-input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .template-task-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+        }
+
+        .template-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* 暗色模式适配 */
+        body[data-theme="dark"] .template-modal-content {
+            background: var(--gray-100);
+            color: white;
+        }
+
+        body[data-theme="dark"] .template-modal-header,
+        body[data-theme="dark"] .template-modal-footer {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-theme="dark"] .template-tabs {
+            background: var(--gray-200);
+        }
+
+        body[data-theme="dark"] .template-time-item {
+            background: var(--gray-200);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-theme="dark"] .template-task-input {
+            background: var(--gray-300);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        body[data-theme="dark"] .template-task-input:focus {
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .template-list {
+            display: none;
+            background: var(--gray-50);
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .template-list.show {
+            display: block;
+        }
+
+        .template-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+            background: white;
+            font-size: 0.8rem;
+        }
+
+        .template-item:hover {
+            background: var(--primary-50);
+        }
+
+        /* 右侧任务面板 */
+        .schedule-panel {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(67, 97, 238, 0.08);
+            overflow-y: auto;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-100);
+        }
+
+        .selected-date {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .date-weekday {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-color);
+        }
+
+        .progress-bar {
+            width: 120px;
+            height: 6px;
+            background: var(--gray-100);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500) 0%, var(--primary-400) 50%, var(--accent-color) 100%);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        /* 时间任务列表 */
+        .schedule-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 6px;
+            margin: 3px 0;
+            transition: all 0.2s ease;
+            min-height: 42px;
+        }
+
+        .schedule-item:hover {
+            background: var(--primary-50);
+        }
+
+        .time {
+            width: 55px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .task {
+            flex-grow: 1;
+            margin: 0 8px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 400;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
+            min-height: 32px;
+            line-height: 1.3;
+        }
+
+        .task:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .checkbox-container {
+            position: relative;
+            width: 22px;
+            height: 22px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 22px;
+            width: 22px;
+            background-color: #ffffff;
+            border: 2px solid var(--primary-color);
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-container input:checked ~ .checkmark {
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            border-color: var(--primary-500);
+        }
+
+        .checkbox-container input:disabled ~ .checkmark {
+            background-color: #f8f8f8;
+            border-color: #d4d4d4;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .checkbox-container input:disabled {
+            cursor: not-allowed;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        .checkbox-container .checkmark:after {
+            left: 7px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .task.completed {
+            text-decoration: line-through;
+            color: var(--gray-500);
+            background-color: var(--completed-bg);
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-color);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--gray-700);
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            display: none;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-500);
+            border: none;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        /* 暗色主题适配 */
+        body[data-theme="dark"] {
+            --primary-50: #1a1d29;
+            --primary-100: #252941;
+            --primary-400: #818cf8;
+            --primary-500: #6366f1;
+            --primary-600: #4f46e5;
+            --gray-50: #1a1a1a;
+            --gray-100: #2d2d2d;
+            --gray-200: #404040;
+            --gray-300: #525252;
+            --gray-400: #737373;
+            --gray-500: #a3a3a3;
+            --gray-600: #d4d4d4;
+            --light-color: #1a1a1a;
+            --dark-color: #ffffff;
+            --success-light: rgba(34, 197, 94, 0.1);
+            --success-main: #22c55e;
+            --warning-light: rgba(251, 146, 60, 0.1);
+            --warning-main: #fb923c;
+            --danger-main: #ef4444;
+            
+            /* 确保整体背景色 */
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+
+        /* 为html元素也设置暗色背景 */
+        html:has(body[data-theme="dark"]) {
+            background-color: #1a1a1a !important;
+        }
+
+        /* 备用方案：使用CSS变量控制 */
+        html {
+            background-color: var(--page-bg, #f0f2f5);
+        }
+
+        body[data-theme="dark"] {
+            --page-bg: #1a1a1a;
+        }
+
+        /* 最强制的方案：直接设置html和body */
+        body[data-theme="dark"],
+        body[data-theme="dark"] html {
+            background: #1a1a1a !important;
+            background-color: #1a1a1a !important;
+        }
+
+        /* 为了确保viewport完全覆盖，添加一个全屏背景层 */
+        body[data-theme="dark"]::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #1a1a1a;
+            z-index: -9999;
+            pointer-events: none;
+        }
+
+        [data-theme="dark"] html {
+            background: #1a1a1a !important;
+            background-color: #1a1a1a !important;
+        }
+
+        [data-theme="dark"] body {
+            background: #1a1a1a !important;
+            background-color: #1a1a1a !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] * {
+            scrollbar-color: #4a4a4a #1a1a1a;
+        }
+
+        [data-theme="dark"]::before,
+        [data-theme="dark"]::after {
+            background-color: #1a1a1a !important;
+        }
+
+        body[data-theme="dark"] .calendar-panel,
+        body[data-theme="dark"] .schedule-panel {
+            background: linear-gradient(145deg, var(--gray-100) 0%, #363636 100%);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body[data-theme="dark"] .task {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gray-300);
+            color: white;
+        }
+
+        body[data-theme="dark"] .task:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: #ffffff !important;
+            border: 2px solid var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        body[data-theme="dark"] .calendar-cell:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-theme="dark"] .calendar-cell.completion-0 {
+            background: var(--gray-200);
+        }
+        
+        body[data-theme="dark"] .calendar-cell.completion-low {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.completion-medium {
+            background: rgba(245, 158, 11, 0.3);
+            color: #fcd34d;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.completion-high {
+            background: rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.completion-full {
+            background: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        body[data-theme="dark"] .template-section {
+            border-top-color: var(--gray-400);
+        }
+
+        body[data-theme="dark"] .template-list {
+            background: var(--gray-200);
+        }
+
+        body[data-theme="dark"] .template-item {
+            background: var(--gray-300);
+            color: white;
+        }
+
+        body[data-theme="dark"] .template-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 暗色模式下勾选框样式 */
+        body[data-theme="dark"] .checkmark {
+            background-color: #3a3a3a;
+            border-color: var(--primary-400);
+        }
+
+        body[data-theme="dark"] .checkbox-container input:disabled ~ .checkmark {
+            background-color: #2d2d2d;
+            border-color: #4a4a4a;
+            opacity: 0.6;
+        }
+
+        /* 暗色模式下今日任务完成度颜色 */
+        body[data-theme="dark"] .calendar-cell.today.completion-0 { 
+            background: #dc2626; /* 红色：今日无任务或0%完成 */
+            color: white;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.today.completion-low { 
+            background: #ea580c; /* 橙红色：今日1-30%完成 */
+            color: white;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.today.completion-medium { 
+            background: #ca8a04; /* 黄色：今日31-70%完成 */
+            color: white;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.today.completion-high { 
+            background: #9333ea; /* 紫色：今日71-99%完成 */
+            color: white;
+        }
+        
+        body[data-theme="dark"] .calendar-cell.today.completion-full { 
+            background: #16a34a; /* 绿色：今日100%完成 */
+            color: white;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: auto;
+            }
+
+            .calendar-panel {
+                height: auto;
+                max-height: 400px;
+            }
+
+            .calendar-grid {
+                margin-bottom: 15px;
+            }
+
+            .quick-actions {
+                flex-direction: row;
+                gap: 6px;
+            }
+
+            .btn {
+                flex: 1;
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 8px;
+            }
+
+            .main-layout {
+                gap: 15px;
+            }
+
+            .calendar-panel,
+            .schedule-panel {
+                padding: 15px;
+            }
+
+            .calendar-header,
+            .schedule-header {
+                margin-bottom: 15px;
+            }
+
+            .month-year,
+            .selected-date {
+                font-size: 1.1rem;
+            }
+
+            .progress-bar {
+                width: 80px;
+            }
+
+            .task {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            .time {
+                width: 60px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="notification" id="notification"></div>
+    
     <div class="container">
         <header>
-            <h1>习惯打卡</h1>
-            <p class="subtitle">养成好习惯，每周记录你的进步</p>
-            
-            <!-- 导航标签 -->
-            <div class="nav-tabs">
-                <button class="nav-tab active" data-tab="active-habits">活跃习惯</button>
-                <button class="nav-tab" data-tab="archived-habits">已归档习惯</button>
-            </div>
+            <h1>智能日程管理</h1>
+            <p class="subtitle">日历视图 | 高效规划每一天 | 按T键切换主题</p>
         </header>
 
-        <!-- 成就统计 -->
-        <div class="achievement-banner">
-            <div class="achievement-icon">🏆</div>
-            <div class="achievement-text">
-                <p>你已经成功养成了 <span id="archived-count">0</span> 个习惯！</p>
-                <p class="achievement-subtitle">继续保持，挑战更多！</p>
+        <div class="main-layout">
+            <!-- 左侧任务面板 -->
+            <div class="schedule-panel">
+                <div class="schedule-header">
+                    <div>
+                        <span class="selected-date" id="selectedDate">请选择日期</span>
+                        <span class="date-weekday" id="selectedWeekday"></span>
+                    </div>
+                    <div class="progress-info">
+                        <span class="progress-text" id="progressText">0/0 (0%)</span>
+                        <div class="progress-bar">
+                            <div class="progress" id="progressBar" style="width: 0%"></div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" id="deleteSchedule" style="display: none;">删除日程</button>
+                    </div>
+                </div>
+
+                <div class="schedule-list" id="scheduleList">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <h3>选择日期查看任务</h3>
+                        <p>点击右侧日历中的日期<br>来查看和管理该日的时间安排</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧日历面板 -->
+            <div class="calendar-panel">
+                <div class="calendar-header">
+                    <button class="nav-btn" id="prevMonth" title="上一月">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15,18 9,12 15,6"></polyline>
+                        </svg>
+                    </button>
+                    <div class="month-year" id="monthYear">2024年12月</div>
+                    <button class="nav-btn" id="nextMonth" title="下一月">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9,18 15,12 9,6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <div class="calendar-header-cell">日</div>
+                    <div class="calendar-header-cell">一</div>
+                    <div class="calendar-header-cell">二</div>
+                    <div class="calendar-header-cell">三</div>
+                    <div class="calendar-header-cell">四</div>
+                    <div class="calendar-header-cell">五</div>
+                    <div class="calendar-header-cell">六</div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="btn btn-primary" id="addTodaySchedule">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                        今日日程
+                    </button>
+                    <button class="btn btn-outline" id="addTomorrowSchedule">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        明日日程
+                    </button>
+                    <button class="btn btn-secondary" id="addWeekSchedule">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <line x1="8" y1="14" x2="16" y2="14"></line>
+                        </svg>
+                        本周日程
+                    </button>
+                    <button class="btn btn-secondary" id="addNextWeekSchedule">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <line x1="8" y1="14" x2="16" y2="14"></line>
+                            <path d="M16 3l4 4-4 4"></path>
+                        </svg>
+                        下周日程
+                    </button>
+                    <button class="btn btn-danger" id="clearCache">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        清空缓存
+                    </button>
+                </div>
+
+                <!-- 模板管理 -->
+                <div class="template-section">
+                    <div class="template-header">
+                        <span class="template-title">日程模板</span>
+                        <div class="template-actions">
+                            <button class="btn btn-sm btn-outline" id="toggleTemplate" title="显示/隐藏模板">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 12l2 2 4-4"></path>
+                                    <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+                                    <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+                                </svg>
+                            </button>
+                            <button class="btn btn-sm btn-primary" id="openTemplateModal" title="模板设置">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="template-list" id="templateList">
+                        <div class="empty-state" style="padding: 20px; text-align: center; font-size: 0.8rem; color: var(--gray-500);">
+                            暂无模板，点击+号添加
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模板设置窗口 -->
+            <div class="template-modal" id="templateModal">
+                <div class="template-modal-content">
+                    <div class="template-modal-header">
+                        <h3 class="template-modal-title">日程模板设置</h3>
+                        <button class="template-close" id="templateModalClose">×</button>
+                    </div>
+                    
+                    <div class="template-modal-body">
+                        <div class="template-tabs">
+                            <button class="template-tab active" id="workdayTab">工作日模板</button>
+                            <button class="template-tab" id="nonWorkdayTab">非工作日模板</button>
+                        </div>
+                        
+                        <!-- 工作日模板 -->
+                        <div class="template-content active" id="workdayContent">
+                            <div class="template-time-list" id="workdayTimeList">
+                                <!-- 时间段将由JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 非工作日模板 -->
+                        <div class="template-content" id="nonWorkdayContent">
+                            <div class="template-time-list" id="nonWorkdayTimeList">
+                                <!-- 时间段将由JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="template-modal-footer">
+                        <button class="btn btn-outline" id="templateModalCancel">取消</button>
+                        <button class="btn btn-primary" id="templateModalSave">保存模板</button>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- 活跃习惯页面 -->
-        <div id="active-habits-page" class="tab-content active">
-            <section class="week-info">
-                <div class="week-display">
-                    <h2>第 <span id="current-week">1</span> 周</h2>
-                    <p>从 <span id="week-start-date">2023-01-01</span> 到 <span id="week-end-date">2023-01-07</span></p>
-                </div>
-                <div class="week-navigation">
-                    <button id="prev-week" class="nav-button">上一周</button>
-                    <button id="current-week-btn" class="nav-button active">本周</button>
-                    <button id="next-week" class="nav-button">下一周</button>
-                </div>
-            </section>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" title="切换主题 (T)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
 
-            <section class="habits-container">
-                <div class="habits-header">
-                    <h2>我的习惯</h2>
-                    <button id="add-habit" class="primary-button">添加习惯</button>
-                </div>
+    <script>
+        // ==================== 全局变量 ====================
+        
+        let schedules = [];
+        let currentDate = new Date();
+        let selectedDate = null;
+        let selectedSchedule = null;
+
+        // ==================== 数据管理 ====================
+        
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('calendarSchedules', JSON.stringify(schedules));
+                localStorage.setItem('calendarCurrentDate', JSON.stringify({
+                    year: currentDate.getFullYear(),
+                    month: currentDate.getMonth(),
+                    day: currentDate.getDate()
+                }));
                 
-                <div class="weekday-header">
-                    <div class="habit-name">习惯名称</div>
-                    <div class="weekday">周一</div>
-                    <div class="weekday">周二</div>
-                    <div class="weekday">周三</div>
-                    <div class="weekday">周四</div>
-                    <div class="weekday">周五</div>
-                    <div class="weekday">周六</div>
-                    <div class="weekday">周日</div>
-                    <div class="habit-target">目标</div>
-                    <div class="habit-actions">操作</div>
-                </div>
+                console.log('数据已保存到localStorage');
+                // 移除自动触发日历渲染，让调用方决定何时渲染
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                showNotification('保存失败，可能是存储空间不足', false);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const savedSchedules = localStorage.getItem('calendarSchedules');
+                const savedDate = localStorage.getItem('calendarCurrentDate');
                 
-                <div id="habits-list">
-                    <!-- 习惯列表将通过JavaScript动态生成 -->
-                </div>
-            </section>
+                if (savedSchedules) {
+                    schedules = JSON.parse(savedSchedules);
+                }
+                
+                if (savedDate) {
+                    const dateData = JSON.parse(savedDate);
+                    currentDate = new Date(dateData.year, dateData.month, dateData.day);
+                }
+                
+                // 设置今天为选中日期
+                selectedDate = new Date();
+                
+                // 执行每日任务流转
+                processUnfinishedTasks();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                schedules = [];
+                currentDate = new Date();
+                selectedDate = new Date();
+            }
+        }
 
-            <!-- 周总结 -->
-            <div class="weekly-summary">
-                <h2>本周总结</h2>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-value" id="total-habits">0</div>
-                        <div class="summary-label">习惯总数</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value" id="completed-checkmarks">0</div>
-                        <div class="summary-label">完成打卡</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value" id="completion-rate">0%</div>
-                        <div class="summary-label">完成率</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-value" id="target-rate">0%</div>
-                        <div class="summary-label">目标达成率</div>
-                    </div>
-                </div>
-                <div class="summary-progress">
-                    <div class="progress-label">本周进度</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="week-progress-fill"></div>
-                    </div>
-                    <div class="progress-text">
-                        已完成 <span id="week-progress-text">0%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 目标信息提示 -->
-            <div class="target-info">
-                <div class="info-message">
-                    <p>系统会自动记录你每周的最高完成次数，并将其设为下周的目标，鼓励你不断挑战自我！</p>
-                </div>
-                <div class="info-message">
-                    <p>当你连续21天完成一个习惯时，它将被自动归档，表示你已经成功养成了这个习惯！</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 已归档习惯页面 -->
-        <div id="archived-habits-page" class="tab-content">
-            <div class="archived-header">
-                <h2>已归档习惯</h2>
-                <p class="archived-subtitle">这些是你已经成功养成的习惯，恭喜你！</p>
-            </div>
+        // ==================== 任务流转功能 ====================
+        
+        function processUnfinishedTasks() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
             
-            <div class="archived-grid" id="archived-habits-grid">
-                <!-- 归档习惯卡片将通过JavaScript动态生成 -->
-            </div>
+            const todayId = formatDateToId(today);
+            const yesterdayId = formatDateToId(yesterday);
             
-            <div class="empty-archived" id="empty-archived">
-                <div class="empty-icon">📝</div>
-                <h3>暂无归档习惯</h3>
-                <p>当你连续21天完成一个习惯时，它将被自动归档到这里。</p>
-                <p>继续坚持，你会看到成果的！</p>
-            </div>
-        </div>
-    </div>
+            const yesterdaySchedule = schedules.find(s => s.dayId == yesterdayId);
+            const todaySchedule = schedules.find(s => s.dayId == todayId);
+            
+            if (yesterdaySchedule && todaySchedule) {
+                let transferredCount = 0;
+                
+                yesterdaySchedule.items.forEach(item => {
+                    if (!item.completed && item.task.trim() !== '') {
+                        // 查找今天相同时间点的任务
+                        const todayItem = todaySchedule.items.find(t => t.time === item.time);
+                        if (todayItem && todayItem.task.trim() === '') {
+                            todayItem.task = item.task;
+                            todayItem.completed = false;
+                            transferredCount++;
+                        }
+                    }
+                });
+                
+                if (transferredCount > 0) {
+                    saveToLocalStorage();
+                    showNotification(`已将${transferredCount}个未完成任务转移到今天`, true);
+                }
+            }
+        }
 
-    <!-- 添加习惯的模态框 -->
-    <div id="habit-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2 id="modal-title">添加新习惯</h2>
-            <form id="habit-form">
-                <div class="form-group">
-                    <label for="habit-name">习惯名称</label>
-                    <input type="text" id="habit-name" placeholder="例如：晨跑、阅读、冥想..." required>
-                </div>
-                <div class="form-group">
-                    <label for="habit-description">描述（可选）</label>
-                    <textarea id="habit-description" placeholder="描述这个习惯的详情..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="habit-color">颜色标记</label>
-                    <input type="color" id="habit-color" value="#3498db">
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="secondary-button" id="cancel-habit">取消</button>
-                    <button type="submit" class="primary-button" id="save-habit">保存</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        // ==================== 日历渲染 ====================
+        
+        function renderCalendar() {
+            console.log('开始渲染日历...');
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // 更新月份年份显示
+            document.getElementById('monthYear').textContent = `${year}年${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            const calendarGrid = document.getElementById('calendarGrid');
+            
+            // 清除现有的日期单元格
+            const existingCells = calendarGrid.querySelectorAll('.calendar-cell');
+            existingCells.forEach(cell => cell.remove());
+            
+            const today = new Date();
+            const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+            
+            console.log(`渲染日历: ${year}年${month + 1}月, 当前月份: ${isCurrentMonth}`);
+            
+            // 添加上个月的尾部日期
+            const prevMonth = new Date(year, month - 1, 0);
+            for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                const cell = createCalendarCell(day, true, new Date(year, month - 1, day));
+                calendarGrid.appendChild(cell);
+            }
+            
+            // 添加当前月的日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const cell = createCalendarCell(day, false, date);
+                
+                // 检查是否是今天
+                if (isCurrentMonth && day === today.getDate()) {
+                    cell.classList.add('today');
+                }
+                
+                // 检查是否被选中
+                if (selectedDate && 
+                    date.getFullYear() === selectedDate.getFullYear() &&
+                    date.getMonth() === selectedDate.getMonth() &&
+                    date.getDate() === selectedDate.getDate()) {
+                    cell.classList.add('selected');
+                }
+                
+                // 设置完成度颜色
+                setCompletionColor(cell, date);
+                
+                calendarGrid.appendChild(cell);
+            }
+            
+            // 添加下个月的开始日期
+            const cellsAdded = startingDayOfWeek + daysInMonth;
+            const cellsNeeded = Math.ceil(cellsAdded / 7) * 7;
+            for (let day = 1; day <= cellsNeeded - cellsAdded; day++) {
+                const cell = createCalendarCell(day, true, new Date(year, month + 1, day));
+                calendarGrid.appendChild(cell);
+            }
+            
+            console.log('日历渲染完成');
+        }
 
-    <!-- 习惯证书模态框 -->
-    <div id="certificate-modal" class="modal">
-        <div class="modal-content certificate-modal-content">
-            <span class="close-modal" id="close-certificate">&times;</span>
-            <div id="certificate-container">
-                <!-- 证书内容将通过JavaScript动态生成 -->
-            </div>
-            <div class="certificate-actions">
-                <button id="download-certificate" class="primary-button">下载证书</button>
-                <button id="close-certificate-btn" class="secondary-button">关闭</button>
-            </div>
-        </div>
-    </div>
+        function createCalendarCell(day, isOtherMonth, date) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+            cell.textContent = day;
+            
+            if (isOtherMonth) {
+                cell.classList.add('other-month');
+            }
+            
+            cell.addEventListener('click', () => {
+                selectDate(date);
+            });
+            
+            return cell;
+        }
 
-    <script src="script.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        function setCompletionColor(cell, date) {
+            // 首先清除所有可能的completion类
+            cell.classList.remove('completion-0', 'completion-low', 'completion-medium', 'completion-high', 'completion-full');
+            
+            const dayId = formatDateToId(date);
+            const schedule = schedules.find(s => s.dayId == dayId);
+            
+            // 检查是否是今天
+            const today = new Date();
+            const isToday = date.getFullYear() === today.getFullYear() &&
+                           date.getMonth() === today.getMonth() &&
+                           date.getDate() === today.getDate();
+            
+            console.log(`设置日期 ${formatDate(date)} (dayId: ${dayId}) 的颜色, 是否今天: ${isToday}`);
+            
+            if (!schedule || schedule.items.length === 0) {
+                console.log('没有找到日程或日程为空，设置为completion-0');
+                cell.classList.add('completion-0');
+                return;
+            }
+            
+            const completedCount = schedule.items.filter(item => item.completed).length;
+            const totalTasks = schedule.items.filter(item => item.task && item.task.trim() !== '').length;
+            
+            console.log(`日程统计: 已完成任务 ${completedCount}, 有内容的任务 ${totalTasks}`);
+            console.log('任务详情:', schedule.items.map(item => ({
+                time: item.time,
+                task: item.task,
+                completed: item.completed,
+                hasContent: item.task && item.task.trim() !== ''
+            })));
+            
+            if (totalTasks === 0) {
+                console.log('没有有内容的任务，设置为completion-0');
+                cell.classList.add('completion-0');
+            } else {
+                const completionRate = (completedCount / totalTasks) * 100;
+                console.log(`完成率: ${completionRate.toFixed(1)}%`);
+                
+                let colorClass = '';
+                if (completionRate === 0) {
+                    colorClass = 'completion-0';
+                } else if (completionRate <= 30) {
+                    colorClass = 'completion-low';
+                } else if (completionRate <= 70) {
+                    colorClass = 'completion-medium';
+                } else if (completionRate < 100) {
+                    colorClass = 'completion-high';
+                } else {
+                    colorClass = 'completion-full';
+                }
+                
+                console.log(`应用颜色类: ${colorClass}`);
+                cell.classList.add(colorClass);
+            }
+        }
+
+        function selectDate(date) {
+            console.log('选择日期:', formatDate(date));
+            selectedDate = new Date(date);
+            
+            // 重新渲染日历以更新选中状态
+            renderCalendar();
+            
+            // 查找并显示选中日期的日程
+            const dayId = formatDateToId(date);
+            selectedSchedule = schedules.find(s => s.dayId == dayId);
+            console.log('选中日期的日程:', selectedSchedule);
+            
+            renderScheduleForDate();
+        }
+
+        // ==================== 日程渲染 ====================
+        
+        function renderScheduleForDate() {
+            if (!selectedDate) {
+                showEmptyState();
+                return;
+            }
+            
+            const dateStr = formatDate(selectedDate);
+            const weekdayStr = getWeekday(selectedDate);
+            
+            document.getElementById('selectedDate').textContent = dateStr;
+            document.getElementById('selectedWeekday').textContent = weekdayStr;
+            
+            if (!selectedSchedule) {
+                showEmptySchedule();
+                return;
+            }
+            
+            // 显示删除按钮
+            document.getElementById('deleteSchedule').style.display = 'inline-flex';
+            
+            // 更新进度信息
+            const tasksWithContent = selectedSchedule.items.filter(item => item.task.trim() !== '');
+            const completedCount = tasksWithContent.filter(item => item.completed).length;
+            const totalItems = tasksWithContent.length;
+            const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+            
+            document.getElementById('progressText').textContent = `${completedCount}/${totalItems} (${progressPercent}%)`;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            
+            // 渲染时间任务列表
+            const scheduleList = document.getElementById('scheduleList');
+            scheduleList.innerHTML = '';
+            
+            const today = new Date();
+            const isToday = selectedDate.getFullYear() === today.getFullYear() &&
+                           selectedDate.getMonth() === today.getMonth() &&
+                           selectedDate.getDate() === today.getDate();
+            
+            selectedSchedule.items.forEach((item, index) => {
+                const scheduleItem = document.createElement('div');
+                scheduleItem.className = 'schedule-item';
+                
+                // 只允许今天的任务被勾选
+                const checkboxDisabled = !isToday ? 'disabled' : '';
+                const checkboxTitle = !isToday ? 'title="只能勾选今天的任务"' : '';
+                
+                scheduleItem.innerHTML = `
+                    <label class="checkbox-container">
+                        <input type="checkbox" ${item.completed ? 'checked' : ''} 
+                               ${checkboxDisabled}
+                               ${checkboxTitle}
+                               ${(!item.task || item.task.trim() === '') ? 'disabled' : ''}
+                               onchange="toggleCompleted(${index})">
+                        <span class="checkmark"></span>
+                    </label>
+                    <span class="time">${item.time}</span>
+                    <input type="text" class="task ${item.completed ? 'completed' : ''}" 
+                           value="${item.task}" 
+                           placeholder=""
+                           data-index="${index}"
+                           ${item.completed ? 'readonly' : ''}
+                           oninput="updateTask(${index}, this.value)"
+                           onkeydown="handleTaskKeyDown(event, ${index})">
+                `;
+                scheduleList.appendChild(scheduleItem);
+            });
+        }
+
+        function showEmptyState() {
+            document.getElementById('selectedDate').textContent = '请选择日期';
+            document.getElementById('selectedWeekday').textContent = '';
+            document.getElementById('progressText').textContent = '0/0 (0%)';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('deleteSchedule').style.display = 'none';
+            
+            const scheduleList = document.getElementById('scheduleList');
+            scheduleList.innerHTML = `
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h3>选择日期查看任务</h3>
+                    <p>点击左侧日历中的日期<br>来查看和管理该日的时间安排</p>
+                </div>
+            `;
+        }
+
+        function showEmptySchedule() {
+            document.getElementById('progressText').textContent = '0/0 (0%)';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('deleteSchedule').style.display = 'none';
+            
+            const scheduleList = document.getElementById('scheduleList');
+            scheduleList.innerHTML = `
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                    <h3>该日期暂无安排</h3>
+                    <p>点击左侧的按钮为该日期<br>创建时间任务安排</p>
+                </div>
+            `;
+        }
+
+        // ==================== 任务操作 ====================
+        
+        function toggleCompleted(index) {
+            if (selectedSchedule && selectedSchedule.items[index]) {
+                const today = new Date();
+                const isToday = selectedDate.getFullYear() === today.getFullYear() &&
+                               selectedDate.getMonth() === today.getMonth() &&
+                               selectedDate.getDate() === today.getDate();
+                
+                if (!isToday) {
+                    showNotification('只能勾选今天的任务', false);
+                    return;
+                }
+                
+                // 检查任务内容是否为空
+                const task = selectedSchedule.items[index].task;
+                if (!task || task.trim() === '') {
+                    showNotification('请先输入任务内容再勾选', false);
+                    return;
+                }
+                
+                console.log('切换任务完成状态:', index, '当前状态:', selectedSchedule.items[index].completed);
+                
+                selectedSchedule.items[index].completed = !selectedSchedule.items[index].completed;
+                
+                console.log('新状态:', selectedSchedule.items[index].completed);
+                console.log('当前日程数据:', selectedSchedule);
+                
+                // 先更新任务列表显示
+                renderScheduleForDate();
+                
+                // 保存数据
+                saveToLocalStorage();
+                
+                // 强制更新日历颜色
+                console.log('开始更新日历颜色...');
+                setTimeout(() => {
+                    renderCalendar();
+                    console.log('日历颜色更新完成');
+                }, 100);
+                
+                const action = selectedSchedule.items[index].completed ? '已完成' : '未完成';
+                const time = selectedSchedule.items[index].time;
+                showNotification(`任务${time}标记为${action}`, selectedSchedule.items[index].completed);
+            }
+        }
+
+        function updateTask(index, task) {
+            if (selectedSchedule && selectedSchedule.items[index]) {
+                console.log('更新任务内容:', index, '原内容:', selectedSchedule.items[index].task, '新内容:', task);
+                
+                selectedSchedule.items[index].task = task;
+                
+                // 如果任务内容变为空，自动取消勾选状态
+                if (!task || task.trim() === '') {
+                    selectedSchedule.items[index].completed = false;
+                }
+                
+                saveToLocalStorage();
+                
+                // 只更新对应的复选框状态，而不重新渲染整个列表
+                updateCheckboxState(index, task);
+                
+                // 任务内容变化会影响完成度计算，需要更新日历颜色
+                console.log('任务内容更新，开始更新日历颜色...');
+                setTimeout(() => {
+                    renderCalendar();
+                    console.log('任务内容更新后日历颜色更新完成');
+                }, 100);
+            }
+        }
+
+        function updateCheckboxState(index, task) {
+            // 找到对应的复选框
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checkbox = checkboxes[index];
+            
+            if (checkbox) {
+                const isEmpty = !task || task.trim() === '';
+                
+                // 更新复选框的禁用状态
+                checkbox.disabled = isEmpty;
+                
+                // 如果任务内容为空，取消勾选状态
+                if (isEmpty) {
+                    checkbox.checked = false;
+                }
+                
+                console.log(`更新复选框 ${index} 状态: 禁用=${isEmpty}, 勾选=${checkbox.checked}`);
+            }
+        }
+
+        function handleTaskKeyDown(event, currentIndex) {
+            if (event.key === 'Tab') {
+                event.preventDefault(); // 阻止默认的Tab行为
+                
+                if (!selectedSchedule || !selectedSchedule.items) return;
+                
+                // 查找下一个可用的输入框（跳过只读的输入框）
+                let nextIndex = currentIndex + 1;
+                let attempts = 0;
+                
+                while (attempts < selectedSchedule.items.length) {
+                    if (nextIndex >= selectedSchedule.items.length) {
+                        nextIndex = 0; // 循环到第一个
+                    }
+                    
+                    const nextItem = selectedSchedule.items[nextIndex];
+                    // 如果不是只读状态，就可以跳转
+                    if (!nextItem.completed) {
+                        break;
+                    }
+                    
+                    nextIndex++;
+                    attempts++;
+                }
+                
+                // 查找下一个输入框元素并聚焦
+                const nextInput = document.querySelector(`input.task[data-index="${nextIndex}"]`);
+                if (nextInput && !nextInput.readOnly) {
+                    nextInput.focus();
+                    nextInput.select(); // 选中文本以便快速编辑
+                }
+            }
+        }
+
+        // ==================== 日程创建 ====================
+        
+        function goToToday() {
+            console.log('跳转到今天');
+            const today = new Date();
+            selectedDate = new Date(today);
+            currentDate = new Date(today);
+            
+            // 查找今日的日程安排（和selectDate函数一样的逻辑）
+            const dayId = formatDateToId(today);
+            selectedSchedule = schedules.find(s => s.dayId == dayId);
+            console.log('今日的日程安排:', selectedSchedule);
+            
+            // 重新渲染日历和任务列表
+            renderCalendar();
+            renderScheduleForDate();
+            
+            showNotification('已切换到今日', true);
+        }
+
+        function addDaySchedule(dateOffset = 0) {
+            const date = new Date();
+            date.setDate(date.getDate() + dateOffset);
+            
+            const dateStr = formatDate(date);
+            const weekdayStr = getWeekday(date);
+            const dayId = formatDateToId(date);
+            
+            // 检查是否已存在
+            const exists = schedules.some(s => s.dayId == dayId);
+            if (exists) {
+                showNotification(`${dateStr}的日程已存在!`, false);
+                // 选择该日期
+                selectDate(date);
+                return;
+            }
+            
+            const newSchedule = {
+                dayId: dayId,
+                date: dateStr,
+                weekday: weekdayStr,
+                items: generateTimeSlotsWithTemplate(date),
+                createdAt: new Date().toISOString()
+            };
+            
+            schedules.unshift(newSchedule);
+            saveToLocalStorage();
+            
+            // 选择新创建的日期
+            selectDate(date);
+            renderCalendar();
+            
+            showNotification(`已添加${dateStr}日程`, true);
+        }
+
+        function addWeekSchedules(isNextWeek = false) {
+            const today = new Date();
+            const currentDay = today.getDay();
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+            
+            // 如果是下周，再加7天
+            const weekOffset = isNextWeek ? 7 : 0;
+            const monday = new Date(today.getTime() + (mondayOffset + weekOffset) * 24 * 60 * 60 * 1000);
+            
+            let addedCount = 0;
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday.getTime() + i * 24 * 60 * 60 * 1000);
+                const dayId = formatDateToId(date);
+                
+                if (!schedules.some(s => s.dayId == dayId)) {
+                    const newSchedule = {
+                        dayId: dayId,
+                        date: formatDate(date),
+                        weekday: getWeekday(date),
+                        items: generateTimeSlotsWithTemplate(date),
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    schedules.push(newSchedule);
+                    addedCount++;
+                }
+            }
+            
+            if (addedCount > 0) {
+                schedules.sort((a, b) => b.dayId - a.dayId);
+                saveToLocalStorage();
+                renderCalendar();
+                renderScheduleForDate();
+                const weekText = isNextWeek ? '下周' : '本周';
+                showNotification(`已添加${weekText}${addedCount}天日程`, true);
+            } else {
+                const weekText = isNextWeek ? '下周' : '本周';
+                showNotification(`${weekText}日程已全部存在`, false);
+            }
+        }
+
+        function deleteCurrentSchedule() {
+            if (!selectedSchedule) return;
+            
+            if (confirm(`确定要删除${selectedSchedule.date}的日程吗？`)) {
+                const index = schedules.findIndex(s => s.dayId === selectedSchedule.dayId);
+                if (index !== -1) {
+                    const deletedDate = schedules[index].date;
+                    schedules.splice(index, 1);
+                    saveToLocalStorage();
+                    
+                    selectedSchedule = null;
+                    renderCalendar();
+                    renderScheduleForDate();
+                    
+                    showNotification(`已删除${deletedDate}日程`, false);
+                }
+            }
+        }
+
+        // ==================== 模板管理 ====================
+        
+        let workdayTemplate = {}; // 工作日模板
+        let nonWorkdayTemplate = {}; // 非工作日模板
+        let currentTemplateTab = 'workday'; // 当前编辑的模板类型
+        
+        function openTemplateModal() {
+            console.log('打开模板设置窗口');
+            
+            // 显示模板窗口
+            document.getElementById('templateModal').classList.add('show');
+            
+            // 初始化模板内容
+            renderTemplateTimeSlots();
+            
+            // 设置默认选中工作日tab
+            switchTemplateTab('workday');
+        }
+        
+        function closeTemplateModal() {
+            console.log('关闭模板设置窗口');
+            document.getElementById('templateModal').classList.remove('show');
+        }
+        
+        function switchTemplateTab(tabType) {
+            console.log('切换模板标签页:', tabType);
+            
+            currentTemplateTab = tabType;
+            
+            // 更新tab按钮状态
+            document.querySelectorAll('.template-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.template-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabType === 'workday') {
+                document.getElementById('workdayTab').classList.add('active');
+                document.getElementById('workdayContent').classList.add('active');
+            } else {
+                document.getElementById('nonWorkdayTab').classList.add('active');
+                document.getElementById('nonWorkdayContent').classList.add('active');
+            }
+            
+            // 更新模板内容
+            loadTemplateData(tabType);
+        }
+        
+        function renderTemplateTimeSlots() {
+            console.log('渲染模板时间段');
+            
+            const workdayContainer = document.getElementById('workdayTimeList');
+            const nonWorkdayContainer = document.getElementById('nonWorkdayTimeList');
+            
+            // 生成时间段HTML
+            const timeSlotHTML = [];
+            for (let hour = 7; hour <= 23; hour++) {
+                const timeSlot = `${hour}:00`;
+                timeSlotHTML.push(`
+                    <div class="template-time-item">
+                        <div class="template-time-label">${timeSlot}</div>
+                        <input type="text" class="template-task-input" 
+                               data-time="${timeSlot}" 
+                               placeholder="输入默认任务..."
+                               onchange="updateTemplateTask('${timeSlot}', this.value)">
+                    </div>
+                `);
+            }
+            
+            workdayContainer.innerHTML = timeSlotHTML.join('');
+            nonWorkdayContainer.innerHTML = timeSlotHTML.join('');
+        }
+        
+        function loadTemplateData(templateType) {
+            console.log('加载模板数据:', templateType);
+            
+            const template = templateType === 'workday' ? workdayTemplate : nonWorkdayTemplate;
+            const container = templateType === 'workday' 
+                ? document.getElementById('workdayTimeList') 
+                : document.getElementById('nonWorkdayTimeList');
+            
+            // 填入已保存的模板数据
+            const inputs = container.querySelectorAll('.template-task-input');
+            inputs.forEach(input => {
+                const time = input.getAttribute('data-time');
+                input.value = template[time] || '';
+            });
+        }
+        
+        function updateTemplateTask(time, task) {
+            console.log('更新模板任务:', currentTemplateTab, time, task);
+            
+            if (currentTemplateTab === 'workday') {
+                if (task.trim()) {
+                    workdayTemplate[time] = task.trim();
+                } else {
+                    delete workdayTemplate[time];
+                }
+            } else {
+                if (task.trim()) {
+                    nonWorkdayTemplate[time] = task.trim();
+                } else {
+                    delete nonWorkdayTemplate[time];
+                }
+            }
+        }
+        
+        function saveTemplates() {
+            console.log('保存模板');
+            
+            try {
+                localStorage.setItem('calendarWorkdayTemplate', JSON.stringify(workdayTemplate));
+                localStorage.setItem('calendarNonWorkdayTemplate', JSON.stringify(nonWorkdayTemplate));
+                
+                console.log('模板已保存到localStorage');
+                showNotification('模板已保存', true);
+                
+                closeTemplateModal();
+                updateTemplateListDisplay();
+                
+            } catch (error) {
+                console.error('保存模板失败:', error);
+                showNotification('保存模板失败', false);
+            }
+        }
+        
+        function loadTemplatesFromStorage() {
+            console.log('从存储加载模板');
+            
+            try {
+                const savedWorkdayTemplate = localStorage.getItem('calendarWorkdayTemplate');
+                const savedNonWorkdayTemplate = localStorage.getItem('calendarNonWorkdayTemplate');
+                
+                if (savedWorkdayTemplate) {
+                    workdayTemplate = JSON.parse(savedWorkdayTemplate);
+                }
+                
+                if (savedNonWorkdayTemplate) {
+                    nonWorkdayTemplate = JSON.parse(savedNonWorkdayTemplate);
+                }
+                
+                updateTemplateListDisplay();
+                
+            } catch (error) {
+                console.error('加载模板失败:', error);
+                workdayTemplate = {};
+                nonWorkdayTemplate = {};
+            }
+        }
+        
+        function updateTemplateListDisplay() {
+            console.log('更新模板列表显示');
+            
+            const templateList = document.getElementById('templateList');
+            
+            const workdayCount = Object.keys(workdayTemplate).length;
+            const nonWorkdayCount = Object.keys(nonWorkdayTemplate).length;
+            const totalCount = workdayCount + nonWorkdayCount;
+            
+            if (totalCount === 0) {
+                templateList.innerHTML = `
+                    <div class="empty-state" style="padding: 20px; text-align: center; font-size: 0.8rem; color: var(--gray-500);">
+                        暂无模板，点击设置按钮添加
+                    </div>
+                `;
+            } else {
+                let html = `
+                    <div class="template-item">
+                        <span>📼 工作日模板: ${workdayCount}个任务</span>
+                    </div>
+                    <div class="template-item">
+                        <span>🎉 非工作日模板: ${nonWorkdayCount}个任务</span>
+                    </div>
+                `;
+                templateList.innerHTML = html;
+            }
+        }
+        
+        function isWorkday(date) {
+            const dayOfWeek = date.getDay();
+            return dayOfWeek >= 1 && dayOfWeek <= 5;
+        }
+        
+        function generateTimeSlotsWithTemplate(date) {
+            console.log('使用模板生成时间段:', formatDate(date));
+            
+            const slots = [];
+            const template = isWorkday(date) ? workdayTemplate : nonWorkdayTemplate;
+            const templateType = isWorkday(date) ? '工作日' : '非工作日';
+            
+            console.log(`使用${templateType}模板:`, template);
+            
+            for (let hour = 7; hour <= 23; hour++) {
+                const timeSlot = `${hour}:00`;
+                const taskContent = template[timeSlot] || '';
+                
+                slots.push({
+                    time: timeSlot,
+                    task: taskContent,
+                    completed: false
+                });
+            }
+            
+            return slots;
+        }
+
+        // ==================== 日历导航 ====================
+        
+        function navigateMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+            saveToLocalStorage();
+        }
+
+        // ==================== 工具函数 ====================
+        
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}年${month}月${day}日`;
+        }
+
+        function formatDateToId(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return year + month + day;
+        }
+
+        function getWeekday(date) {
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            return weekdays[date.getDay()];
+        }
+
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isSuccess ? 'var(--primary-color)' : 'var(--danger-color)';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function clearCache() {
+            if (confirm('确定要清空所有数据吗？此操作不可恢复！')) {
+                localStorage.removeItem('calendarSchedules');
+                localStorage.removeItem('calendarCurrentDate');
+                localStorage.removeItem('calendarWorkdayTemplate');
+                localStorage.removeItem('calendarNonWorkdayTemplate');
+                schedules = [];
+                workdayTemplate = {};
+                nonWorkdayTemplate = {};
+                selectedSchedule = null;
+                currentDate = new Date();
+                selectedDate = new Date();
+                
+                renderCalendar();
+                renderScheduleForDate();
+                updateTemplateListDisplay();
+                showNotification('缓存已清空', false);
+            }
+        }
+
+        // ==================== 主题切换 ====================
+        
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('calendarTheme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            // 强制设置html背景色
+            if (newTheme === 'dark') {
+                document.documentElement.style.backgroundColor = '#1a1a1a';
+                document.documentElement.style.background = '#1a1a1a';
+            } else {
+                document.documentElement.style.backgroundColor = '#f0f2f5';
+                document.documentElement.style.background = '#f0f2f5';
+            }
+            
+            showNotification(`已切换到${newTheme === 'dark' ? '暗色' : '亮色'}主题`, true);
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('calendarTheme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            // 强制设置html背景色
+            if (savedTheme === 'dark') {
+                document.documentElement.style.backgroundColor = '#1a1a1a';
+                document.documentElement.style.background = '#1a1a1a';
+            } else {
+                document.documentElement.style.backgroundColor = '#f0f2f5';
+                document.documentElement.style.background = '#f0f2f5';
+            }
+        }
+
+        function updateThemeIcon(theme) {
+            const themeToggle = document.getElementById('themeToggle');
+            const icon = theme === 'dark' 
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                   </svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <circle cx="12" cy="12" r="5"></circle>
+                     <line x1="12" y1="1" x2="12" y2="3"></line>
+                     <line x1="12" y1="21" x2="12" y2="23"></line>
+                     <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                     <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                     <line x1="1" y1="12" x2="3" y2="12"></line>
+                     <line x1="21" y1="12" x2="23" y2="12"></line>
+                     <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                     <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                   </svg>`;
+            themeToggle.innerHTML = icon;
+        }
+
+        // ==================== 初始化 ====================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化主题和数据
+            initializeTheme();
+            loadFromLocalStorage();
+            loadTemplatesFromStorage(); // 加载模板数据
+            
+            console.log('页面加载完成，当前日程数据:', schedules);
+            console.log('当前选中日期:', selectedDate);
+            console.log('当前选中日程:', selectedSchedule);
+            
+            // 初始渲染
+            renderCalendar();
+            renderScheduleForDate();
+            updateTemplateListDisplay(); // 更新模板显示
+            
+            // 事件监听器
+            document.getElementById('prevMonth').addEventListener('click', () => navigateMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => navigateMonth(1));
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // 快速操作按钮
+            document.getElementById('addTodaySchedule').addEventListener('click', goToToday);
+            document.getElementById('addTomorrowSchedule').addEventListener('click', () => addDaySchedule(1));
+            document.getElementById('addWeekSchedule').addEventListener('click', () => addWeekSchedules(false));
+            document.getElementById('addNextWeekSchedule').addEventListener('click', () => addWeekSchedules(true));
+            document.getElementById('clearCache').addEventListener('click', clearCache);
+            
+            // 删除日程按钮
+            document.getElementById('deleteSchedule').addEventListener('click', deleteCurrentSchedule);
+            
+            // 模板管理按钮
+            document.getElementById('toggleTemplate').addEventListener('click', function() {
+                const templateList = document.getElementById('templateList');
+                templateList.classList.toggle('show');
+            });
+            document.getElementById('openTemplateModal').addEventListener('click', openTemplateModal);
+            
+            // 模板窗口事件监听器
+            document.getElementById('templateModalClose').addEventListener('click', closeTemplateModal);
+            document.getElementById('templateModalCancel').addEventListener('click', closeTemplateModal);
+            document.getElementById('templateModalSave').addEventListener('click', saveTemplates);
+            
+            // 模板标签页切换
+            document.getElementById('workdayTab').addEventListener('click', () => switchTemplateTab('workday'));
+            document.getElementById('nonWorkdayTab').addEventListener('click', () => switchTemplateTab('nonworkday'));
+            
+            // 点击模板窗口外部关闭窗口
+            document.getElementById('templateModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeTemplateModal();
+                }
+            });
+            
+            // 快捷键支持
+            document.addEventListener('keydown', function(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                    return;
+                }
+                
+                if (event.key.toLowerCase() === 't' && !event.ctrlKey && !event.altKey) {
+                    event.preventDefault();
+                    toggleTheme();
+                }
+                
+                // 方向键导航日历
+                if (selectedDate) {
+                    let newDate = null;
+                    switch(event.key) {
+                        case 'ArrowLeft':
+                            event.preventDefault();
+                            newDate = new Date(selectedDate);
+                            newDate.setDate(newDate.getDate() - 1);
+                            selectDate(newDate);
+                            break;
+                        case 'ArrowRight':
+                            event.preventDefault();
+                            newDate = new Date(selectedDate);
+                            newDate.setDate(newDate.getDate() + 1);
+                            selectDate(newDate);
+                            break;
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            newDate = new Date(selectedDate);
+                            newDate.setDate(newDate.getDate() - 7);
+                            selectDate(newDate);
+                            break;
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            newDate = new Date(selectedDate);
+                            newDate.setDate(newDate.getDate() + 7);
+                            selectDate(newDate);
+                            break;
+                    }
+                }
+            });
+            
+            showNotification('智能日程管理日历版已加载完成！', true);
+        });
+    </script>
 </body>
-</html> 
+</html>
