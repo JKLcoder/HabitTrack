@@ -5,7 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能日程管理 - 日历视图版</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // 检查Supabase是否成功加载的函数
+        function checkSupabaseLoaded() {
+            return new Promise((resolve) => {
+                if (typeof supabase !== 'undefined' && supabase.createClient) {
+                    resolve(true);
+                } else {
+                    // 等待一段时间再检查
+                    setTimeout(() => {
+                        if (typeof supabase !== 'undefined' && supabase.createClient) {
+                            resolve(true);
+                        } else {
+                            console.warn('Supabase库加载失败，将使用离线模式');
+                            resolve(false);
+                        }
+                    }, 3000); // 等待3秒
+                }
+            });
+        }
+    </script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2" 
+            onerror="console.error('Supabase库加载失败，网络连接问题')"
+            onload="console.log('Supabase库加载成功')"></script>
     <style>
         :root {
             /* 主色调升级 */
@@ -293,6 +315,18 @@
             background: linear-gradient(135deg, var(--danger-main) 0%, #d32f2f 100%);
             color: white;
             box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-danger-outline {
+            background: transparent;
+            color: var(--danger-main);
+            border: 1px solid var(--danger-main);
+        }
+        
+        .btn-danger-outline:hover {
+            background: var(--danger-main);
+            color: white;
+            transform: translateY(-1px);
         }
 
         .btn-sm {
@@ -1322,6 +1356,16 @@
         .sync-indicator.offline {
             background: var(--danger-main);
         }
+        
+        .sync-indicator.editing {
+            background: #fbbf24;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .sync-indicator.pending {
+            background: #f97316;
+            animation: pulse 2s infinite;
+        }
 
         @keyframes pulse {
             0% { opacity: 1; }
@@ -1343,9 +1387,9 @@
             
             <div class="auth-error" id="authError"></div>
             
-            <form class="auth-form" id="authForm">
-                <input type="email" class="auth-input" id="authEmail" placeholder="邮箱地址" required>
-                <input type="password" class="auth-input" id="authPassword" placeholder="密码" required minlength="6">
+            <form class="auth-form" id="authForm" autocomplete="on">
+                <input type="email" class="auth-input" id="authEmail" placeholder="邮箱地址" required autocomplete="email">
+                <input type="password" class="auth-input" id="authPassword" placeholder="密码" required minlength="6" autocomplete="current-password">
                 <button type="submit" class="auth-button auth-button-primary" id="authSubmit">登录</button>
             </form>
             
@@ -1488,8 +1532,51 @@
                             <polyline points="3,6 5,6 21,6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
-                        清空缓存
+                        清空日程
                     </button>
+                    <button class="btn btn-danger-outline btn-sm" id="clearAll" title="清空所有数据包括模板" style="margin-left: 8px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                            <polyline points="3,6 5,6 21,6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            <line x1="8" y1="11" x2="8" y2="17"></line>
+                            <line x1="12" y1="11" x2="12" y2="17"></line>
+                            <line x1="16" y1="11" x2="16" y2="17"></line>
+                        </svg>
+                        完全清空
+                    </button>
+                </div>
+
+                <!-- 数据备份恢复区域 -->
+                <div class="backup-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--gray-200);">
+                    <div class="backup-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span class="backup-title" style="font-size: 0.9rem; font-weight: 600; color: var(--primary-color);">数据管理</span>
+                    </div>
+                    <div class="backup-actions" style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" id="restoreBackup">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                                <polyline points="23,4 23,10 17,10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            恢复备份
+                        </button>
+                        <button class="btn btn-outline btn-sm" id="createBackup">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17,21 17,13 7,13 7,21"></polyline>
+                                <polyline points="7,3 7,8 15,8"></polyline>
+                            </svg>
+                            创建备份
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="forceSyncAll" title="立即同步所有数据到云端">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                                <polyline points="23,4 23,10 17,10"></polyline>
+                                <polyline points="1,20 1,14 7,14"></polyline>
+                                <path d="m20.49 9a9 9 0 1 1-2.12-3.36L23 10"></path>
+                                <path d="m3.51 15a9 9 0 1 1 2.13 3.36L1 14"></path>
+                            </svg>
+                            强制同步
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 模板管理 -->
@@ -1580,9 +1667,32 @@
         const supabaseUrl = 'https://jpkqzqlajatekscukcre.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa3F6cWxhamF0ZWtzY3VrY3JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMTE1ODgsImV4cCI6MjA3MDU4NzU4OH0.bXjCO0gqcCZ3GjQMl7uE8COAwo7LgYBRMoiaHkiVe7s';
         
-        // 初始化Supabase客户端
-        const { createClient } = supabase;
-        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+        // 安全初始化Supabase客户端
+        let supabaseClient = null;
+        let isSupabaseAvailable = false;
+        
+        async function initializeSupabase() {
+            try {
+                // 检查Supabase库是否加载成功
+                const supabaseLoaded = await checkSupabaseLoaded();
+                
+                if (supabaseLoaded && typeof supabase !== 'undefined') {
+                    const { createClient } = supabase;
+                    supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+                    isSupabaseAvailable = true;
+                    console.log('Supabase客户端初始化成功');
+                    return true;
+                } else {
+                    console.warn('Supabase库未加载，使用离线模式');
+                    isSupabaseAvailable = false;
+                    return false;
+                }
+            } catch (error) {
+                console.error('Supabase初始化失败:', error);
+                isSupabaseAvailable = false;
+                return false;
+            }
+        }
         
         // ==================== 全局变量 ====================
         
@@ -1596,39 +1706,62 @@
         
         // 离线数据缓存
         let offlineSchedules = [];
-        let pendingChanges = [];
+        let offlinePendingChanges = []; // 重命名以避免与新的同步系统冲突
         
         // ==================== 认证管理 ====================
         
         async function initializeAuth() {
             console.log('初始化认证系统...');
             
-            // 检查现有会话
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            // 如果Supabase不可用，跳过认证直接使用离线模式
+            if (!isSupabaseAvailable || !supabaseClient) {
+                console.log('Supabase不可用，跳过认证，使用离线模式');
+                showNotification('网络连接问题，使用离线模式', false);
+                loadFromLocalStorage();
+                loadTemplatesFromStorage();
+                renderCalendar();
+                renderScheduleForDate();
+                updateTemplateListDisplay();
+                return;
+            }
             
-            if (session?.user) {
-                console.log('发现现有会话:', session.user.email);
-                await handleAuthSuccess(session.user);
-            } else {
-                showAuthModal();
-                // 如果没有用户会话，加载本地数据作为fallback
+            try {
+                // 检查现有会话
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (session?.user) {
+                    console.log('发现现有会话:', session.user.email);
+                    await handleAuthSuccess(session.user);
+                } else {
+                    showAuthModal();
+                    // 如果没有用户会话，加载本地数据作为fallback
+                    loadFromLocalStorage();
+                    loadTemplatesFromStorage();
+                    renderCalendar();
+                    renderScheduleForDate();
+                    updateTemplateListDisplay();
+                }
+                
+                // 监听认证状态变化
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    console.log('认证状态变化:', event, session?.user?.email);
+                    
+                    if (event === 'SIGNED_IN' && session?.user) {
+                        await handleAuthSuccess(session.user);
+                    } else if (event === 'SIGNED_OUT') {
+                        handleAuthLogout();
+                    }
+                });
+            } catch (error) {
+                console.error('认证系统初始化失败:', error);
+                showNotification('认证系统异常，使用离线模式', false);
+                // Fallback到离线模式
                 loadFromLocalStorage();
                 loadTemplatesFromStorage();
                 renderCalendar();
                 renderScheduleForDate();
                 updateTemplateListDisplay();
             }
-            
-            // 监听认证状态变化
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                console.log('认证状态变化:', event, session?.user?.email);
-                
-                if (event === 'SIGNED_IN' && session?.user) {
-                    await handleAuthSuccess(session.user);
-                } else if (event === 'SIGNED_OUT') {
-                    handleAuthLogout();
-                }
-            });
         }
         
         function showAuthModal() {
@@ -1654,7 +1787,11 @@
             // 同步数据
             await syncDataFromServer();
             
-            // 数据迁移功能已移除
+            // 认证成功后执行任务流转
+            setTimeout(() => {
+                console.log('用户认证完成，执行任务流转检查');
+                processUnfinishedTasks();
+            }, 500);
             
             // 显示成功消息
             showNotification(`欢迎回来，${user.email.split('@')[0]}！`, true);
@@ -1695,12 +1832,37 @@
             errorEl.textContent = message;
             errorEl.style.display = 'block';
             
+            // 确保输入框不会因为错误显示而被清空
+            setTimeout(() => {
+                const emailInput = document.getElementById('authEmail');
+                const passwordInput = document.getElementById('authPassword');
+                
+                // 如果输入框为空但应该有值，则保持之前的值
+                if (emailInput && !emailInput.value && emailInput.dataset.lastValue) {
+                    emailInput.value = emailInput.dataset.lastValue;
+                }
+            }, 100);
+            
             setTimeout(() => {
                 errorEl.style.display = 'none';
             }, 5000);
         }
         
         async function handleEmailAuth(email, password) {
+            console.log('开始处理邮箱认证:', email);
+            
+            // 检查Supabase是否可用
+            if (!isSupabaseAvailable || !supabaseClient) {
+                showAuthError('网络连接异常，无法进行在线认证');
+                return;
+            }
+            
+            // 获取输入框元素以便在需要时恢复值
+            const emailInput = document.getElementById('authEmail');
+            const passwordInput = document.getElementById('authPassword');
+            const originalEmail = email;
+            const originalPassword = password;
+            
             try {
                 const authEl = document.getElementById('authSubmit');
                 authEl.textContent = '处理中...';
@@ -1710,6 +1872,7 @@
                 
                 if (isAuthMode) {
                     // 注册
+                    console.log('执行注册操作');
                     result = await supabaseClient.auth.signUp({
                         email,
                         password,
@@ -1720,15 +1883,24 @@
                     if (result.data.user && !result.data.session) {
                         showNotification('请检查您的邮箱并确认注册', true);
                         toggleAuthMode(); // 切换回登录模式
+                        // 注册成功后保留邮箱，清空密码
+                        emailInput.value = originalEmail;
+                        passwordInput.value = '';
                     }
                 } else {
                     // 登录
+                    console.log('执行登录操作');
                     result = await supabaseClient.auth.signInWithPassword({
                         email,
                         password,
                     });
                     
                     if (result.error) throw result.error;
+                    
+                    console.log('登录成功，用户信息:', result.data.user);
+                    // 登录成功，清空输入框
+                    emailInput.value = '';
+                    passwordInput.value = '';
                 }
                 
             } catch (error) {
@@ -1742,9 +1914,16 @@
                 } else if (error.message.includes('User already registered')) {
                     errorMessage = '该邮箱已注册，请直接登录';
                     toggleAuthMode();
+                } else if (error.message.includes('fetch')) {
+                    errorMessage = '网络连接异常，请检查网络';
                 } else {
                     errorMessage = error.message;
                 }
+                
+                // 认证失败时恢复输入框的值
+                console.log('认证失败，恢复输入框值');
+                emailInput.value = originalEmail;
+                passwordInput.value = originalPassword;
                 
                 showAuthError(errorMessage);
             } finally {
@@ -1782,21 +1961,44 @@
         
         // ==================== 数据同步管理 ====================
         
+        // 安全检查Supabase是否可用
+        function checkSupabaseAvailable() {
+            if (!isSupabaseAvailable || !supabaseClient) {
+                console.warn('Supabase不可用，跳过云端操作');
+                return false;
+            }
+            return true;
+        }
+        
         function updateSyncStatus(status, text) {
             const indicator = document.getElementById('syncIndicator');
             const textEl = document.getElementById('syncText');
             
-            indicator.className = `sync-indicator ${status}`;
-            textEl.textContent = text;
+            if (indicator && textEl) {
+                indicator.className = `sync-indicator ${status}`;
+                textEl.textContent = text;
+            }
         }
         
         async function syncDataFromServer() {
-            if (!currentUser) return;
+            if (!currentUser || !checkSupabaseAvailable()) {
+                console.log('用户未登录或Supabase不可用，跳过数据同步');
+                return;
+            }
             
             updateSyncStatus('syncing', '同步中...');
             
             try {
-                // 获取用户的日程数据
+                // 1. 备份当前本地数据
+                const localBackup = {
+                    schedules: JSON.parse(JSON.stringify(schedules)),
+                    workdayTemplate: JSON.parse(JSON.stringify(workdayTemplate)),
+                    nonWorkdayTemplate: JSON.parse(JSON.stringify(nonWorkdayTemplate))
+                };
+                
+                console.log('本地数据备份完成，本地日程数量:', localBackup.schedules.length);
+                
+                // 2. 获取服务器数据
                 const { data: schedulesData, error: schedulesError } = await supabaseClient
                     .from('schedules')
                     .select('*')
@@ -1813,41 +2015,27 @@
                     throw schedulesError;
                 }
                 
-                // 获取用户的模板数据
-                const { data: templatesData, error: templatesError } = await supabaseClient
+                console.log('服务器数据获取完成，服务器日程数量:', schedulesData ? schedulesData.length : 0);
+                
+                // 3. 智能合并数据
+                const mergedSchedules = mergeScheduleData(localBackup.schedules, schedulesData || []);
+                
+                console.log('数据合并完成，最终日程数量:', mergedSchedules.length);
+                
+                // 4. 获取其他数据（模板、设置）
+                const { data: templatesData } = await supabaseClient
                     .from('templates')
                     .select('*')
                     .eq('user_id', currentUser.id);
                 
-                // 模板错误不是致命的，可以忽略
-                if (templatesError && !templatesError.message.includes('does not exist')) {
-                    console.warn('获取模板数据失败:', templatesError);
-                }
-                
-                // 获取用户设置
-                const { data: settingsData, error: settingsError } = await supabaseClient
+                const { data: settingsData } = await supabaseClient
                     .from('user_settings')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .single();
                 
-                // 设置错误也不是致命错误
-                if (settingsError && !settingsError.message.includes('does not exist')) {
-                    console.warn('获取用户设置失败:', settingsError);
-                }
-                
-                // 更新本地数据 - 确保字段名一致
-                if (schedulesData && schedulesData.length > 0) {
-                    schedules = schedulesData.map(serverSchedule => ({
-                        dayId: serverSchedule.day_id,  // 数据库字段 -> 本地字段
-                        date: serverSchedule.date,
-                        weekday: serverSchedule.weekday,
-                        items: serverSchedule.items || [],
-                        createdAt: serverSchedule.created_at
-                    }));
-                } else {
-                    schedules = [];
-                }
+                // 5. 更新本地数据
+                schedules = mergedSchedules;
                 
                 // 更新模板
                 if (templatesData && templatesData.length > 0) {
@@ -1875,65 +2063,74 @@
                     }
                 }
                 
-                // 重新渲染界面
+                // 6. 保存合并后的数据到本地存储
+                saveToLocalStorage();
+                
+                // 7. 重新渲染界面
                 renderCalendar();
                 renderScheduleForDate();
                 updateTemplateListDisplay();
                 
                 updateSyncStatus('', '已同步');
-                console.log('数据同步完成，获取到', schedules.length, '条日程');
+                console.log('数据同步完成');
+                
+                // 8. 如果有数据合并，提示用户
+                const addedCount = mergedSchedules.length - Math.max(localBackup.schedules.length, schedulesData?.length || 0);
+                if (addedCount > 0) {
+                    showNotification(`数据同步完成，合并了 ${addedCount} 条新数据`, true);
+                }
                 
             } catch (error) {
                 console.error('数据同步失败:', error);
                 updateSyncStatus('offline', '同步失败');
-                
-                // 提供详细错误信息
-                if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                    console.error('⚠️ 数据库表不存在！请在Supabase控制台运行以下SQL脚本：');
-                    console.error('请查看README-supabase.md文件中的SQL脚本');
-                    showNotification('请先在Supabase中创建数据库表', false);
-                } else {
-                    showNotification('数据同步失败：' + error.message, false);
-                }
+                showNotification('数据同步失败，已保留本地数据: ' + error.message, false);
             }
         }
         
-        async function saveToSupabase() {
+        // 改进的保存函数 - 增加重试机制
+        async function saveToSupabaseWithRetry(maxRetries = 3) {
             // 总是先保存到本地存储，确保数据不丢失
             saveToLocalStorage();
             
-            if (!currentUser || !isOnline) {
-                console.log('用户未登录或离线，数据已保存到本地');
+            if (!currentUser || !isOnline || !checkSupabaseAvailable()) {
+                console.log('用户未登录、离线或Supabase不可用，数据已保存到本地');
                 return;
             }
             
-            updateSyncStatus('syncing', '保存中...');
-            
-            try {
-                // 保存日程数据
-                await saveSchedulesToSupabase();
-                
-                // 保存用户设置
-                await saveUserSettingsToSupabase();
-                
-                updateSyncStatus('', '已同步');
-                console.log('数据已同步到云端');
-                
-            } catch (error) {
-                console.error('保存到Supabase失败:', error);
-                updateSyncStatus('offline', '同步失败');
-                
-                // 提供详细错误信息
-                if (error.message.includes('relation') && error.message.includes('does not exist')) {
-                    showNotification('数据库表未创建，请先运行SQL脚本', false);
-                    console.error('请在Supabase控制台运行README中的SQL脚本创建数据库表');
-                } else if (error.message.includes('new row violates row-level security policy')) {
-                    showNotification('数据库权限配置错误', false);
-                    console.error('请检查Supabase行级安全策略配置');
-                } else {
-                    showNotification('数据同步失败，已保存到本地: ' + error.message, false);
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    updateSyncStatus('syncing', `保存中...${attempt}/${maxRetries}`);
+                    
+                    // 保存前验证数据完整性
+                    if (!validateDataIntegrity()) {
+                        throw new Error('数据完整性验证失败');
+                    }
+                    
+                    await saveSchedulesToSupabase();
+                    await saveUserSettingsToSupabase();
+                    
+                    updateSyncStatus('', '已同步');
+                    console.log(`数据保存成功 (尝试 ${attempt}/${maxRetries})`);
+                    return; // 成功后退出
+                    
+                } catch (error) {
+                    console.error(`保存失败 (尝试 ${attempt}/${maxRetries}):`, error);
+                    
+                    if (attempt === maxRetries) {
+                        // 最后一次尝试失败
+                        updateSyncStatus('offline', '同步失败');
+                        showNotification(`数据保存失败（已尝试${maxRetries}次），已保存到本地`, false);
+                    } else {
+                        // 等待后重试
+                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    }
                 }
             }
+        }
+
+        // 保持原函数向后兼容
+        async function saveToSupabase() {
+            return await saveToSupabaseWithRetry();
         }
         
         async function saveSchedulesToSupabase() {
@@ -2012,12 +2209,24 @@
                     }
                 };
                 
-                // 使用 upsert 操作（插入或更新）
-                const { error } = await supabaseClient
+                // 先尝试插入，如果失败则更新
+                let { error: insertError } = await supabaseClient
                     .from('user_settings')
-                    .upsert([settingsData], { onConflict: 'user_id' });
+                    .insert([settingsData]);
                 
-                if (error) throw error;
+                if (insertError) {
+                    if (insertError.code === '23505') {
+                        // 唯一约束冲突，说明记录已存在，执行更新操作
+                        const { error: updateError } = await supabaseClient
+                            .from('user_settings')
+                            .update(settingsData)
+                            .eq('user_id', currentUser.id);
+                        
+                        if (updateError) throw updateError;
+                    } else {
+                        throw insertError;
+                    }
+                }
                 
             } catch (error) {
                 console.error('保存用户设置失败:', error);
@@ -2031,28 +2240,58 @@
             try {
                 // 保存工作日模板
                 if (Object.keys(workdayTemplate).length > 0) {
-                    const { error: workdayError } = await supabaseClient
-                        .from('templates')
-                        .upsert([{
-                            user_id: currentUser.id,
-                            template_type: 'workday',
-                            template_data: workdayTemplate
-                        }], { onConflict: 'user_id,template_type' });
+                    const workdayData = {
+                        user_id: currentUser.id,
+                        template_type: 'workday',
+                        template_data: workdayTemplate
+                    };
                     
-                    if (workdayError) throw workdayError;
+                    let { error: insertError } = await supabaseClient
+                        .from('templates')
+                        .insert([workdayData]);
+                    
+                    if (insertError) {
+                        if (insertError.code === '23505') {
+                            // 记录已存在，执行更新
+                            const { error: updateError } = await supabaseClient
+                                .from('templates')
+                                .update(workdayData)
+                                .eq('user_id', currentUser.id)
+                                .eq('template_type', 'workday');
+                            
+                            if (updateError) throw updateError;
+                        } else {
+                            throw insertError;
+                        }
+                    }
                 }
                 
                 // 保存非工作日模板
                 if (Object.keys(nonWorkdayTemplate).length > 0) {
-                    const { error: nonWorkdayError } = await supabaseClient
-                        .from('templates')
-                        .upsert([{
-                            user_id: currentUser.id,
-                            template_type: 'nonworkday',
-                            template_data: nonWorkdayTemplate
-                        }], { onConflict: 'user_id,template_type' });
+                    const nonWorkdayData = {
+                        user_id: currentUser.id,
+                        template_type: 'nonworkday',
+                        template_data: nonWorkdayTemplate
+                    };
                     
-                    if (nonWorkdayError) throw nonWorkdayError;
+                    let { error: insertError } = await supabaseClient
+                        .from('templates')
+                        .insert([nonWorkdayData]);
+                    
+                    if (insertError) {
+                        if (insertError.code === '23505') {
+                            // 记录已存在，执行更新
+                            const { error: updateError } = await supabaseClient
+                                .from('templates')
+                                .update(nonWorkdayData)
+                                .eq('user_id', currentUser.id)
+                                .eq('template_type', 'nonworkday');
+                            
+                            if (updateError) throw updateError;
+                        } else {
+                            throw insertError;
+                        }
+                    }
                 }
                 
             } catch (error) {
@@ -2081,13 +2320,431 @@
         
         async function processPendingChanges() {
             // 处理离线期间累积的变更
-            if (pendingChanges.length > 0) {
-                console.log('处理离线期间的变更:', pendingChanges.length);
+            if (offlinePendingChanges.length > 0) {
+                console.log('处理离线期间的变更:', offlinePendingChanges.length);
                 // 这里将实现冲突解决逻辑
-                pendingChanges = []; // 临时清空
+                offlinePendingChanges = []; // 临时清空
             }
         }
         
+        // ==================== 性能监控和统计 ====================
+        
+        let syncStats = {
+            totalSyncs: 0,
+            incrementalSyncs: 0,
+            fullSyncs: 0,
+            failedSyncs: 0,
+            savedBytes: 0,
+            lastSyncTime: null
+        };
+
+        function updateSyncStats(type, success = true, dataSize = 0) {
+            syncStats.totalSyncs++;
+            
+            if (success) {
+                if (type === 'incremental') {
+                    syncStats.incrementalSyncs++;
+                } else if (type === 'full') {
+                    syncStats.fullSyncs++;
+                }
+                syncStats.savedBytes += dataSize;
+                syncStats.lastSyncTime = new Date().toISOString();
+            } else {
+                syncStats.failedSyncs++;
+            }
+            
+            // 显示统计信息到控制台
+            console.log('同步统计:', {
+                总同步次数: syncStats.totalSyncs,
+                增量同步: syncStats.incrementalSyncs,
+                全量同步: syncStats.fullSyncs,
+                失败次数: syncStats.failedSyncs,
+                成功率: ((syncStats.totalSyncs - syncStats.failedSyncs) / syncStats.totalSyncs * 100).toFixed(1) + '%',
+                已保存数据: (syncStats.savedBytes / 1024).toFixed(2) + 'KB',
+                最后同步: syncStats.lastSyncTime ? new Date(syncStats.lastSyncTime).toLocaleString() : '无'
+            });
+        }
+
+        // 获取同步统计信息
+        function getSyncStats() {
+            return {
+                ...syncStats,
+                successRate: ((syncStats.totalSyncs - syncStats.failedSyncs) / syncStats.totalSyncs * 100).toFixed(1) + '%',
+                savedKB: (syncStats.savedBytes / 1024).toFixed(2) + 'KB'
+            };
+        }
+
+        // ==================== 优化的数据同步系统 ====================
+        
+        let pendingChanges = new Set(); // 记录待提交的日程ID
+        let saveTimer = null; // 防抖定时器
+        let updateTimer = null; // 任务更新防抖定时器
+        
+        // 防抖保存函数
+        function saveToSupabaseDebounced(changedDayId) {
+            // 记录需要保存的日程
+            if (changedDayId) {
+                pendingChanges.add(changedDayId);
+                console.log('添加到待同步列表:', changedDayId, '待同步数量:', pendingChanges.size);
+            }
+            
+            // 先保存到本地存储（立即）
+            saveToLocalStorage();
+            updateSyncIndicator('pending');
+            
+            // 清除之前的定时器
+            if (saveTimer) {
+                clearTimeout(saveTimer);
+            }
+            
+            // 设置新的定时器，2秒后提交到云端
+            saveTimer = setTimeout(async () => {
+                try {
+                    updateSyncIndicator('syncing');
+                    await saveChangedSchedulesToSupabase();
+                    updateSyncIndicator('synced');
+                } catch (error) {
+                    console.error('防抖保存失败:', error);
+                    updateSyncIndicator('error');
+                }
+            }, 2000); // 2秒防抖延迟
+        }
+
+        // 增量保存函数：只保存修改过的数据
+        async function saveChangedSchedulesToSupabase() {
+            if (!currentUser || pendingChanges.size === 0) return;
+            
+            const startTime = Date.now();
+            console.log('开始增量保存，待保存数量:', pendingChanges.size);
+            
+            const changedScheduleIds = Array.from(pendingChanges);
+            const changedSchedules = schedules.filter(s => changedScheduleIds.includes(s.dayId));
+            
+            let totalDataSize = 0;
+            
+            for (const schedule of changedSchedules) {
+                try {
+                    const scheduleData = {
+                        user_id: currentUser.id,
+                        day_id: schedule.dayId,
+                        date: schedule.date,
+                        weekday: schedule.weekday,
+                        items: schedule.items || [],
+                        updated_at: new Date().toISOString()
+                    };
+                    
+                    // 计算数据大小
+                    totalDataSize += JSON.stringify(scheduleData).length;
+                    
+                    // 先尝试插入，如果失败则更新
+                    let { error: insertError } = await supabaseClient
+                        .from('schedules')
+                        .insert([scheduleData]);
+                    
+                    if (insertError) {
+                        if (insertError.code === '23505') {
+                            // 唯一约束冲突，说明记录已存在，执行更新操作
+                            console.log('记录已存在，执行更新操作:', schedule.date);
+                            const { error: updateError } = await supabaseClient
+                                .from('schedules')
+                                .update(scheduleData)
+                                .eq('user_id', currentUser.id)
+                                .eq('day_id', schedule.dayId);
+                            
+                            if (updateError) {
+                                console.error('更新操作失败:', updateError);
+                                throw updateError;
+                            }
+                            console.log('更新成功:', schedule.date);
+                        } else {
+                            console.error('插入操作失败:', insertError);
+                            throw insertError;
+                        }
+                    } else {
+                        console.log('插入成功:', schedule.date);
+                    }
+                    
+                } catch (error) {
+                    console.error('增量保存失败:', schedule.date, error);
+                    // 更新失败统计
+                    updateSyncStats('incremental', false);
+                    throw error;
+                }
+            }
+            
+            // 清空待提交列表
+            pendingChanges.clear();
+            
+            const duration = Date.now() - startTime;
+            console.log(`增量保存完成，耗时 ${duration}ms，数据量 ${(totalDataSize/1024).toFixed(2)}KB`);
+            
+            // 更新成功统计
+            updateSyncStats('incremental', true, totalDataSize);
+        }
+
+        // 更新同步状态指示器
+        function updateSyncIndicator(status) {
+            const syncIndicator = document.getElementById('syncIndicator');
+            const syncText = document.getElementById('syncText');
+            
+            if (!syncIndicator || !syncText) return;
+            
+            switch(status) {
+                case 'editing':
+                    syncIndicator.className = 'sync-indicator editing';
+                    syncText.textContent = '编辑中';
+                    syncIndicator.style.background = '#fbbf24';
+                    break;
+                case 'pending':
+                    syncIndicator.className = 'sync-indicator pending';
+                    syncText.textContent = `待同步(${pendingChanges.size})`;
+                    syncIndicator.style.background = '#f97316';
+                    break;
+                case 'syncing':
+                    syncIndicator.className = 'sync-indicator syncing';
+                    syncText.textContent = '同步中';
+                    syncIndicator.style.background = '#3b82f6';
+                    break;
+                case 'synced':
+                    syncIndicator.className = 'sync-indicator';
+                    syncText.textContent = '已同步';
+                    syncIndicator.style.background = '#10b981';
+                    break;
+                case 'error':
+                    syncIndicator.className = 'sync-indicator offline';
+                    syncText.textContent = '同步失败';
+                    syncIndicator.style.background = '#ef4444';
+                    break;
+            }
+        }
+
+        // 强制同步所有数据
+        async function forceSyncAll() {
+            try {
+                const startTime = Date.now();
+                updateSyncIndicator('syncing');
+                
+                // 将所有日程加入待提交列表
+                schedules.forEach(s => pendingChanges.add(s.dayId));
+                
+                console.log(`开始强制同步 ${schedules.length} 条日程`);
+                
+                await saveChangedSchedulesToSupabase();
+                
+                const duration = Date.now() - startTime;
+                
+                updateSyncIndicator('synced');
+                showNotification(`已强制同步${schedules.length}条日程 (${duration}ms)`, true);
+                
+                // 更新全量同步统计
+                updateSyncStats('full', true, JSON.stringify(schedules).length);
+                
+            } catch (error) {
+                console.error('强制同步失败:', error);
+                updateSyncIndicator('error');
+                showNotification('强制同步失败：' + error.message, false);
+                
+                // 更新失败统计
+                updateSyncStats('full', false);
+            }
+        }
+
+        // ==================== 数据同步辅助函数 ====================
+        
+        // 智能数据合并函数
+        function mergeScheduleData(localSchedules, serverSchedules) {
+            console.log('开始合并数据...');
+            console.log('本地数据:', localSchedules.length, '条');
+            console.log('服务器数据:', serverSchedules.length, '条');
+            
+            // 创建合并结果的Map，使用dayId作为key
+            const mergedMap = new Map();
+            
+            // 1. 先添加本地数据
+            localSchedules.forEach(schedule => {
+                if (schedule.dayId) {
+                    mergedMap.set(schedule.dayId, {
+                        ...schedule,
+                        source: 'local',
+                        lastModified: schedule.createdAt || new Date().toISOString()
+                    });
+                }
+            });
+            
+            // 2. 合并服务器数据
+            serverSchedules.forEach(serverSchedule => {
+                const dayId = serverSchedule.day_id;
+                const localSchedule = mergedMap.get(dayId);
+                
+                const serverData = {
+                    dayId: serverSchedule.day_id,
+                    date: serverSchedule.date,
+                    weekday: serverSchedule.weekday,
+                    items: serverSchedule.items || [],
+                    createdAt: serverSchedule.created_at,
+                    source: 'server',
+                    lastModified: serverSchedule.updated_at || serverSchedule.created_at
+                };
+                
+                if (!localSchedule) {
+                    // 服务器有，本地没有 -> 直接添加
+                    mergedMap.set(dayId, serverData);
+                    console.log(`添加服务器数据: ${serverSchedule.date}`);
+                } else {
+                    // 两边都有 -> 需要决定使用哪个
+                    const localTime = new Date(localSchedule.lastModified).getTime();
+                    const serverTime = new Date(serverData.lastModified).getTime();
+                    
+                    if (serverTime > localTime) {
+                        // 服务器数据更新 -> 使用服务器数据
+                        mergedMap.set(dayId, serverData);
+                        console.log(`使用服务器较新数据: ${serverSchedule.date}`);
+                    } else if (localTime > serverTime) {
+                        // 本地数据更新 -> 保持本地数据
+                        console.log(`保持本地较新数据: ${localSchedule.date}`);
+                    } else {
+                        // 时间相同 -> 合并任务内容
+                        const mergedItems = mergeTaskItems(localSchedule.items, serverData.items);
+                        mergedMap.set(dayId, {
+                            ...localSchedule,
+                            items: mergedItems,
+                            source: 'merged'
+                        });
+                        console.log(`合并同时间数据: ${localSchedule.date}`);
+                    }
+                }
+            });
+            
+            // 转换为数组并排序
+            const result = Array.from(mergedMap.values())
+                .sort((a, b) => b.dayId - a.dayId); // 按日期倒序
+            
+            console.log('合并完成，最终数据量:', result.length);
+            return result;
+        }
+
+        // 合并任务项目
+        function mergeTaskItems(localItems, serverItems) {
+            const merged = {};
+            
+            // 先添加本地任务
+            localItems.forEach(item => {
+                merged[item.time] = item;
+            });
+            
+            // 合并服务器任务
+            serverItems.forEach(serverItem => {
+                const localItem = merged[serverItem.time];
+                if (!localItem) {
+                    // 本地没有该时间段 -> 直接添加
+                    merged[serverItem.time] = serverItem;
+                } else {
+                    // 本地有该时间段 -> 选择有内容的任务
+                    if (!localItem.task || localItem.task.trim() === '') {
+                        // 本地任务为空 -> 使用服务器任务
+                        merged[serverItem.time] = serverItem;
+                    }
+                    // 否则保持本地任务（本地优先原则）
+                }
+            });
+            
+            // 转换为数组并排序
+            return Object.values(merged).sort((a, b) => a.time.localeCompare(b.time));
+        }
+
+        // 数据完整性验证
+        function validateDataIntegrity() {
+            // 检查schedules数组是否存在
+            if (!Array.isArray(schedules)) {
+                console.error('schedules不是数组');
+                return false;
+            }
+            
+            // 检查是否有重复的dayId
+            const dayIds = schedules.map(s => s.dayId).filter(id => id);
+            const uniqueDayIds = new Set(dayIds);
+            if (dayIds.length !== uniqueDayIds.size) {
+                console.error('发现重复的dayId');
+                return false;
+            }
+            
+            // 检查每个schedule是否有必要字段
+            for (const schedule of schedules) {
+                if (!schedule.dayId || !schedule.date || !schedule.items) {
+                    console.error('发现缺少必要字段的schedule:', schedule);
+                    return false;
+                }
+            }
+            
+            console.log('数据完整性验证通过');
+            return true;
+        }
+
+        // 数据恢复函数
+        function restoreFromBackup() {
+            const backup = localStorage.getItem('calendarSchedulesBackup');
+            const backupTime = localStorage.getItem('calendarSchedulesBackupTime');
+            
+            if (backup) {
+                try {
+                    const backupData = JSON.parse(backup);
+                    const backupDate = backupTime ? new Date(backupTime).toLocaleString() : '未知时间';
+                    
+                    const confirmRestore = confirm(`发现备份数据（${backupData.length}条记录，备份时间：${backupDate}），确定要恢复吗？这将覆盖当前数据。`);
+                    
+                    if (confirmRestore) {
+                        schedules = backupData;
+                        saveToLocalStorage();
+                        renderCalendar();
+                        renderScheduleForDate();
+                        showNotification(`已从备份恢复${backupData.length}条数据`, true);
+                        console.log('数据恢复成功，恢复了', backupData.length, '条记录');
+                        
+                        // 如果用户已登录，立即强制同步所有数据
+                        if (currentUser) {
+                            forceSyncAll();
+                        }
+                    }
+                } catch (error) {
+                    console.error('数据恢复失败:', error);
+                    showNotification('数据恢复失败：备份数据损坏', false);
+                }
+            } else {
+                showNotification('没有找到备份数据', false);
+            }
+        }
+
+        // 创建数据备份
+        function createDataBackup() {
+            try {
+                localStorage.setItem('calendarSchedulesBackup', JSON.stringify(schedules));
+                localStorage.setItem('calendarSchedulesBackupTime', new Date().toISOString());
+                showNotification(`已创建数据备份（${schedules.length}条记录）`, true);
+                console.log('数据备份已创建，备份了', schedules.length, '条记录');
+            } catch (error) {
+                console.error('创建数据备份失败:', error);
+                showNotification('创建备份失败：' + error.message, false);
+            }
+        }
+
+        // 自动备份机制
+        function enableAutoBackup() {
+            // 每30分钟自动备份一次
+            setInterval(() => {
+                if (schedules.length > 0) {
+                    createDataBackup();
+                    console.log('自动备份已创建');
+                }
+            }, 30 * 60 * 1000);
+            
+            // 页面卸载前备份
+            window.addEventListener('beforeunload', () => {
+                if (schedules.length > 0) {
+                    createDataBackup();
+                }
+            });
+        }
+
         // ==================== 数据迁移功能 ====================
         
         async function migrateFromLocalStorage() {
@@ -2192,15 +2849,34 @@
                     }
                     
                     if (templatesData.length > 0) {
-                        const { error } = await supabaseClient
-                            .from('templates')
-                            .upsert(templatesData, { onConflict: 'user_id,template_type' });
-                        
-                        if (error && !error.message.includes('does not exist')) {
-                            console.warn('模板迁移失败:', error);
-                        } else {
-                            console.log('模板数据迁移完成');
+                        // 逐个插入模板数据
+                        for (const templateData of templatesData) {
+                            try {
+                                let { error: insertError } = await supabaseClient
+                                    .from('templates')
+                                    .insert([templateData]);
+                                
+                                if (insertError) {
+                                    if (insertError.code === '23505') {
+                                        // 记录已存在，执行更新
+                                        const { error: updateError } = await supabaseClient
+                                            .from('templates')
+                                            .update(templateData)
+                                            .eq('user_id', currentUser.id)
+                                            .eq('template_type', templateData.template_type);
+                                        
+                                        if (updateError && !updateError.message.includes('does not exist')) {
+                                            console.warn('模板更新失败:', updateError);
+                                        }
+                                    } else if (!insertError.message.includes('does not exist')) {
+                                        console.warn('模板插入失败:', insertError);
+                                    }
+                                }
+                            } catch (error) {
+                                console.warn('模板迁移失败:', error);
+                            }
                         }
+                        console.log('模板数据迁移完成');
                     }
                 }
                 
@@ -2215,12 +2891,28 @@
                     }
                 };
                 
-                const { error: settingsError } = await supabaseClient
-                    .from('user_settings')
-                    .upsert([settingsData], { onConflict: 'user_id' });
-                
-                if (settingsError && !settingsError.message.includes('does not exist')) {
-                    console.warn('用户设置迁移失败:', settingsError);
+                try {
+                    let { error: insertError } = await supabaseClient
+                        .from('user_settings')
+                        .insert([settingsData]);
+                    
+                    if (insertError) {
+                        if (insertError.code === '23505') {
+                            // 记录已存在，执行更新
+                            const { error: updateError } = await supabaseClient
+                                .from('user_settings')
+                                .update(settingsData)
+                                .eq('user_id', currentUser.id);
+                            
+                            if (updateError && !updateError.message.includes('does not exist')) {
+                                console.warn('用户设置更新失败:', updateError);
+                            }
+                        } else if (!insertError.message.includes('does not exist')) {
+                            console.warn('用户设置插入失败:', insertError);
+                        }
+                    }
+                } catch (error) {
+                    console.warn('用户设置迁移失败:', error);
                 }
                 
                 if (migratedCount > 0) {
@@ -2253,6 +2945,13 @@
         
         function saveToLocalStorage() {
             try {
+                // 在保存前先创建备份
+                const currentData = localStorage.getItem('calendarSchedules');
+                if (currentData && JSON.parse(currentData).length > 0) {
+                    localStorage.setItem('calendarSchedulesBackup', currentData);
+                    localStorage.setItem('calendarSchedulesBackupTime', new Date().toISOString());
+                }
+                
                 localStorage.setItem('calendarSchedules', JSON.stringify(schedules));
                 localStorage.setItem('calendarCurrentDate', JSON.stringify({
                     year: currentDate.getFullYear(),
@@ -2260,7 +2959,7 @@
                     day: currentDate.getDate()
                 }));
                 
-                console.log('数据已保存到localStorage');
+                console.log('数据已保存到localStorage，包含', schedules.length, '条记录');
             } catch (error) {
                 console.error('保存数据失败:', error);
                 showNotification('保存失败，可能是存储空间不足', false);
@@ -2284,10 +2983,15 @@
                 // 设置今天为选中日期
                 selectedDate = new Date();
                 
-                // 执行每日任务流转
+                // 延迟执行每日任务流转，确保认证状态已稳定
                 setTimeout(() => {
+                    // 只有在不是登录过程中才执行任务流转
+                    if (!document.getElementById('authModal').classList.contains('hidden')) {
+                        console.log('检测到登录窗口显示，跳过任务流转');
+                        return;
+                    }
                     processUnfinishedTasks();
-                }, 500); // 延迟执行确保数据加载完成
+                }, 1000); // 增加延迟时间，确保登录流程完成
             } catch (error) {
                 console.error('加载数据失败:', error);
                 schedules = [];
@@ -2339,6 +3043,14 @@
             
             let transferredCount = 0;
             
+            // 检查是否应该进行任务流转
+            const shouldTransfer = shouldTransferTasks(yesterday, today);
+            
+            if (!shouldTransfer) {
+                console.log('跨工作日/非工作日边界，跳过任务流转');
+                return;
+            }
+            
             // 遍历昨天的任务，将未完成的任务流转到今天
             yesterdaySchedule.items.forEach(item => {
                 if (!item.completed && item.task && item.task.trim() !== '') {
@@ -2369,11 +3081,54 @@
                     console.log('更新当前选中的今日日程数据');
                 }
                 
-                saveToSupabase();
+                // 只有在用户已登录的情况下才保存到云端
+                if (currentUser) {
+                    saveToSupabaseWithRetry();
+                } else {
+                    // 如果用户未登录，只保存到本地
+                    saveToLocalStorage();
+                    console.log('用户未登录，任务流转结果仅保存到本地');
+                }
+                
                 showNotification(`已将${transferredCount}个未完成任务转移到今天`, true);
             } else {
                 console.log('没有需要流转的任务');
             }
+        }
+
+        // 判断是否应该进行任务流转
+        function shouldTransferTasks(fromDate, toDate) {
+            const fromIsWorkday = isWorkday(fromDate);
+            const toIsWorkday = isWorkday(toDate);
+            
+            const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            console.log(`任务流转检查: ${formatDate(fromDate)}(${dayNames[fromDate.getDay()]},${fromIsWorkday ? '工作日' : '非工作日'}) -> ${formatDate(toDate)}(${dayNames[toDate.getDay()]},${toIsWorkday ? '工作日' : '非工作日'})`);
+            
+            // 规则1: 工作日到工作日 - 允许流转
+            if (fromIsWorkday && toIsWorkday) {
+                console.log('✅ 工作日到工作日，允许任务流转');
+                return true;
+            }
+            
+            // 规则2: 非工作日到非工作日 - 允许流转
+            if (!fromIsWorkday && !toIsWorkday) {
+                console.log('✅ 非工作日到非工作日，允许任务流转');
+                return true;
+            }
+            
+            // 规则3: 工作日到非工作日 - 不允许流转（周五到周六）
+            if (fromIsWorkday && !toIsWorkday) {
+                console.log('❌ 工作日到非工作日，禁止任务流转（避免工作任务流转到休息日）');
+                return false;
+            }
+            
+            // 规则4: 非工作日到工作日 - 不允许流转（周日到周一）
+            if (!fromIsWorkday && toIsWorkday) {
+                console.log('❌ 非工作日到工作日，禁止任务流转（避免休闲任务流转到工作日）');
+                return false;
+            }
+            
+            return false;
         }
 
         // ==================== 日历渲染 ====================
@@ -2678,6 +3433,9 @@
                 
                 console.log('切换任务完成状态:', index, '当前状态:', selectedSchedule.items[index].completed);
                 
+                // 显示编辑状态
+                updateSyncIndicator('editing');
+                
                 selectedSchedule.items[index].completed = !selectedSchedule.items[index].completed;
                 
                 console.log('新状态:', selectedSchedule.items[index].completed);
@@ -2686,8 +3444,8 @@
                 // 先更新任务列表显示
                 renderScheduleForDate();
                 
-                // 保存数据
-                saveToSupabase();
+                // 使用防抖保存，只提交当前修改的日程
+                saveToSupabaseDebounced(selectedSchedule.dayId);
                 
                 // 强制更新日历颜色
                 console.log('开始更新日历颜色...');
@@ -2706,6 +3464,9 @@
             if (selectedSchedule && selectedSchedule.items[index]) {
                 console.log('更新任务内容:', index, '原内容:', selectedSchedule.items[index].task, '新内容:', task);
                 
+                // 显示编辑状态
+                updateSyncIndicator('editing');
+                
                 selectedSchedule.items[index].task = task;
                 
                 // 如果任务内容变为空，自动取消勾选状态
@@ -2713,7 +3474,8 @@
                     selectedSchedule.items[index].completed = false;
                 }
                 
-                saveToSupabase();
+                // 使用防抖保存，只提交当前修改的日程
+                saveToSupabaseDebounced(selectedSchedule.dayId);
                 
                 // 只更新对应的复选框状态，而不重新渲染整个列表
                 updateCheckboxState(index, task);
@@ -2831,7 +3593,9 @@
             };
             
             schedules.unshift(newSchedule);
-            saveToSupabase();
+            
+            // 使用防抖保存新创建的日程
+            saveToSupabaseDebounced(newSchedule.dayId);
             
             // 选择新创建的日期
             selectDate(date);
@@ -2871,7 +3635,21 @@
             
             if (addedCount > 0) {
                 schedules.sort((a, b) => b.dayId - a.dayId);
-                saveToSupabase();
+                
+                // 批量保存所有新创建的日程
+                const newScheduleIds = [];
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(monday.getTime() + i * 24 * 60 * 60 * 1000);
+                    const dayId = formatDateToId(date);
+                    if (schedules.some(s => s.dayId == dayId)) {
+                        newScheduleIds.push(dayId);
+                    }
+                }
+                
+                // 将新日程加入待同步列表
+                newScheduleIds.forEach(id => pendingChanges.add(id));
+                saveToSupabaseDebounced();
+                
                 renderCalendar();
                 renderScheduleForDate();
                 const weekText = isNextWeek ? '下周' : '本周';
@@ -3102,17 +3880,26 @@
         
         function isWorkday(date) {
             const dayOfWeek = date.getDay();
-            return dayOfWeek >= 1 && dayOfWeek <= 5;
+            const isWork = dayOfWeek >= 1 && dayOfWeek <= 5;
+            
+            // 添加详细的调试日志
+            const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            console.log(`日期: ${formatDate(date)}, 星期: ${dayNames[dayOfWeek]} (${dayOfWeek}), 是否工作日: ${isWork}`);
+            
+            return isWork;
         }
         
         function generateTimeSlotsWithTemplate(date) {
             console.log('使用模板生成时间段:', formatDate(date));
             
             const slots = [];
-            const template = isWorkday(date) ? workdayTemplate : nonWorkdayTemplate;
-            const templateType = isWorkday(date) ? '工作日' : '非工作日';
+            const isWork = isWorkday(date);
+            const template = isWork ? workdayTemplate : nonWorkdayTemplate;
+            const templateType = isWork ? '工作日' : '非工作日';
             
             console.log(`使用${templateType}模板:`, template);
+            console.log(`工作日模板任务数: ${Object.keys(workdayTemplate).length}`);
+            console.log(`非工作日模板任务数: ${Object.keys(nonWorkdayTemplate).length}`);
             
             for (let hour = 7; hour <= 23; hour++) {
                 const timeSlot = `${hour}:00`;
@@ -3125,6 +3912,8 @@
                 });
             }
             
+            console.log(`生成了 ${slots.length} 个时间段，其中 ${slots.filter(s => s.task).length} 个有任务内容`);
+            
             return slots;
         }
 
@@ -3133,7 +3922,9 @@
         function navigateMonth(direction) {
             currentDate.setMonth(currentDate.getMonth() + direction);
             renderCalendar();
-            saveToSupabase();
+            
+            // 导航操作不需要频繁同步，仅保存到本地
+            saveToLocalStorage();
         }
 
         // ==================== 工具函数 ====================
@@ -3169,30 +3960,102 @@
         }
 
         function clearCache() {
-            if (confirm('确定要清空所有数据吗？此操作不可恢复！')) {
-                // 清空本地存储
+            if (confirm('确定要清空日程数据吗？（模板数据将被保留）')) {
+                // 备份模板数据
+                const workdayTemplateBackup = { ...workdayTemplate };
+                const nonWorkdayTemplateBackup = { ...nonWorkdayTemplate };
+                
+                // 清空日程相关的本地存储（保留模板）
                 localStorage.removeItem('calendarSchedules');
                 localStorage.removeItem('calendarCurrentDate');
-                localStorage.removeItem('calendarWorkdayTemplate');
-                localStorage.removeItem('calendarNonWorkdayTemplate');
+                localStorage.removeItem('calendarSchedulesBackup');
+                localStorage.removeItem('calendarSchedulesBackupTime');
                 
-                // 重置本地变量
+                // 重置日程相关的本地变量（保留模板）
                 schedules = [];
-                workdayTemplate = {};
-                nonWorkdayTemplate = {};
                 selectedSchedule = null;
                 currentDate = new Date();
                 selectedDate = new Date();
                 
-                // 如果用户已登录，也清空云端数据
-                if (currentUser && confirm('是否同时清空云端数据？')) {
-                    clearSupabaseData();
+                // 恢复模板数据
+                workdayTemplate = workdayTemplateBackup;
+                nonWorkdayTemplate = nonWorkdayTemplateBackup;
+                
+                // 清空同步系统的待提交列表
+                if (typeof pendingChanges !== 'undefined') {
+                    pendingChanges.clear();
+                }
+                
+                // 如果用户已登录，询问是否清空云端日程数据
+                if (currentUser && confirm('是否同时清空云端日程数据？（云端模板数据将被保留）')) {
+                    clearSupabaseSchedulesOnly();
                 }
                 
                 renderCalendar();
                 renderScheduleForDate();
                 updateTemplateListDisplay();
-                showNotification('缓存已清空', false);
+                showNotification('日程数据已清空，模板数据已保留', true);
+            }
+        }
+
+        // 新增：只清空云端日程数据的函数
+        async function clearSupabaseSchedulesOnly() {
+            try {
+                updateSyncIndicator('syncing');
+                
+                // 只删除日程数据，保留模板和设置
+                const { error } = await supabaseClient
+                    .from('schedules')
+                    .delete()
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                updateSyncIndicator('synced');
+                console.log('云端日程数据已清空');
+                
+            } catch (error) {
+                console.error('清空云端日程数据失败:', error);
+                updateSyncIndicator('error');
+                showNotification('清空云端数据失败: ' + error.message, false);
+            }
+        }
+        
+        // 完全清空所有数据（包括模板）
+        function clearAllData() {
+            if (confirm('⚠️ 警告：此操作将清空所有数据（包括日程和模板），确定要继续吗？')) {
+                if (confirm('🔥 最后确认：所有数据将被永久删除，包括您精心设置的模板，确定要继续吗？')) {
+                    // 清空所有本地存储
+                    localStorage.removeItem('calendarSchedules');
+                    localStorage.removeItem('calendarCurrentDate');
+                    localStorage.removeItem('calendarWorkdayTemplate');
+                    localStorage.removeItem('calendarNonWorkdayTemplate');
+                    localStorage.removeItem('calendarSchedulesBackup');
+                    localStorage.removeItem('calendarSchedulesBackupTime');
+                    
+                    // 重置所有本地变量
+                    schedules = [];
+                    workdayTemplate = {};
+                    nonWorkdayTemplate = {};
+                    selectedSchedule = null;
+                    currentDate = new Date();
+                    selectedDate = new Date();
+                    
+                    // 清空同步系统的待提交列表
+                    if (typeof pendingChanges !== 'undefined') {
+                        pendingChanges.clear();
+                    }
+                    
+                    // 如果用户已登录，也清空云端所有数据
+                    if (currentUser && confirm('是否同时清空云端所有数据（包括模板）？')) {
+                        clearSupabaseData();
+                    }
+                    
+                    renderCalendar();
+                    renderScheduleForDate();
+                    updateTemplateListDisplay();
+                    showNotification('所有数据已清空', false);
+                }
             }
         }
         
@@ -3300,9 +4163,201 @@
             themeToggle.innerHTML = icon;
         }
 
+        // ==================== 开发者调试工具 ====================
+        
+        // 在浏览器控制台中可用的调试函数
+        window.debugCalendar = {
+            // 查看同步统计
+            stats: () => {
+                console.table(getSyncStats());
+                return getSyncStats();
+            },
+            
+            // 查看待同步列表
+            pending: () => {
+                console.log('待同步的日程ID:', Array.from(pendingChanges));
+                return Array.from(pendingChanges);
+            },
+            
+            // 强制同步
+            sync: forceSyncAll,
+            
+            // 查看本地数据
+            data: () => {
+                console.log('本地日程数据:', schedules);
+                return schedules;
+            },
+            
+            // 测试模板逻辑
+            testTemplate: () => {
+                console.log('🧪 测试模板逻辑：');
+                
+                // 测试本周每一天
+                const today = new Date();
+                const thisWeekDates = [];
+                
+                // 获取本周的周一
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - today.getDay() + 1);
+                
+                // 生成本周7天
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(monday);
+                    date.setDate(monday.getDate() + i);
+                    thisWeekDates.push(date);
+                }
+                
+                console.log('📅 本周各天的模板选择：');
+                thisWeekDates.forEach(date => {
+                    const dayOfWeek = date.getDay();
+                    const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+                    const isWork = isWorkday(date);
+                    const templateType = isWork ? '工作日模板' : '非工作日模板';
+                    
+                    console.log(`${formatDate(date)} (${dayNames[dayOfWeek]}) -> ${templateType}`);
+                });
+                
+                console.log('\n📊 模板内容：');
+                console.log('工作日模板任务数:', Object.keys(workdayTemplate).length, workdayTemplate);
+                console.log('非工作日模板任务数:', Object.keys(nonWorkdayTemplate).length, nonWorkdayTemplate);
+                
+                return {
+                    weekDates: thisWeekDates.map(date => ({
+                        date: formatDate(date),
+                        dayOfWeek: date.getDay(),
+                        isWorkday: isWorkday(date),
+                        templateType: isWorkday(date) ? 'workday' : 'nonworkday'
+                    })),
+                    templates: {
+                        workday: workdayTemplate,
+                        nonworkday: nonWorkdayTemplate
+                    }
+                };
+            },
+            
+            // 测试任务流转逻辑
+            testTaskTransfer: () => {
+                console.log('🔄 测试任务流转逻辑：');
+                
+                const testCases = [
+                    { from: '2025-08-14', to: '2025-08-15', desc: '周四到周五（工作日到工作日）' },
+                    { from: '2025-08-15', to: '2025-08-16', desc: '周五到周六（工作日到非工作日）' },
+                    { from: '2025-08-16', to: '2025-08-17', desc: '周六到周日（非工作日到非工作日）' },
+                    { from: '2025-08-17', to: '2025-08-18', desc: '周日到周一（非工作日到工作日）' },
+                    { from: '2025-08-18', to: '2025-08-19', desc: '周一到周二（工作日到工作日）' }
+                ];
+                
+                testCases.forEach(testCase => {
+                    const fromDate = new Date(testCase.from);
+                    const toDate = new Date(testCase.to);
+                    const shouldTransfer = shouldTransferTasks(fromDate, toDate);
+                    
+                    console.log(`${testCase.desc}: ${shouldTransfer ? '✅ 允许流转' : '❌ 禁止流转'}`);
+                });
+                
+                return testCases.map(testCase => ({
+                    ...testCase,
+                    shouldTransfer: shouldTransferTasks(new Date(testCase.from), new Date(testCase.to))
+                }));
+            },
+            
+            // 测试登录流程
+            testLogin: () => {
+                console.log('🔐 登录流程诊断：');
+                
+                // 检查关键元素
+                const authForm = document.getElementById('authForm');
+                const authEmail = document.getElementById('authEmail');
+                const authPassword = document.getElementById('authPassword');
+                const authSubmit = document.getElementById('authSubmit');
+                const authModal = document.getElementById('authModal');
+                
+                console.log('📋 关键元素检查：');
+                console.log('authForm:', authForm ? '✅ 存在' : '❌ 缺失');
+                console.log('authEmail:', authEmail ? '✅ 存在' : '❌ 缺失');
+                console.log('authPassword:', authPassword ? '✅ 存在' : '❌ 缺失');
+                console.log('authSubmit:', authSubmit ? '✅ 存在' : '❌ 缺失');
+                console.log('authModal:', authModal ? '✅ 存在' : '❌ 缺失');
+                
+                // 检查Supabase客户端
+                console.log('🔌 Supabase客户端:', typeof supabaseClient !== 'undefined' ? '✅ 已初始化' : '❌ 未初始化');
+                
+                // 检查认证状态
+                console.log('👤 当前用户:', currentUser ? `✅ 已登录 (${currentUser.email})` : '❌ 未登录');
+                
+                // 检查模态框状态
+                const isModalHidden = authModal ? authModal.classList.contains('hidden') : 'unknown';
+                console.log('🪟 登录窗口状态:', isModalHidden ? '隐藏' : '显示');
+                
+                // 检查表单值
+                if (authEmail && authPassword) {
+                    console.log('📝 表单内容:');
+                    console.log('  邮箱:', authEmail.value || '(空)');
+                    console.log('  密码:', authPassword.value ? '***' : '(空)');
+                }
+                
+                return {
+                    elementsExist: {
+                        authForm: !!authForm,
+                        authEmail: !!authEmail,
+                        authPassword: !!authPassword,
+                        authSubmit: !!authSubmit,
+                        authModal: !!authModal
+                    },
+                    supabaseReady: typeof supabaseClient !== 'undefined',
+                    currentUser: currentUser,
+                    modalVisible: !isModalHidden
+                };
+            },
+            
+            // 查看模板
+            templates: () => {
+                console.log('工作日模板:', workdayTemplate);
+                console.log('非工作日模板:', nonWorkdayTemplate);
+                return { workday: workdayTemplate, nonworkday: nonWorkdayTemplate };
+            },
+            
+            // 清除统计
+            clearStats: () => {
+                syncStats = {
+                    totalSyncs: 0,
+                    incrementalSyncs: 0,
+                    fullSyncs: 0,
+                    failedSyncs: 0,
+                    savedBytes: 0,
+                    lastSyncTime: null
+                };
+                console.log('统计数据已清除');
+            },
+            
+            // 模拟网络错误
+            simulateError: () => {
+                const originalClient = supabaseClient;
+                supabaseClient = {
+                    ...originalClient,
+                    from: () => ({
+                        upsert: () => Promise.reject(new Error('模拟网络错误'))
+                    })
+                };
+                setTimeout(() => {
+                    supabaseClient = originalClient;
+                    console.log('网络错误模拟结束');
+                }, 5000);
+                console.log('开始模拟网络错误，5秒后恢复');
+            }
+        };
+        
+        console.log('🚀 数据同步优化完成！');
+        console.log('📊 在控制台输入 debugCalendar.stats() 查看同步统计');
+        console.log('🔧 可用调试命令:', Object.keys(window.debugCalendar));
+
         // ==================== 初始化 ====================
         
         document.addEventListener('DOMContentLoaded', async function() {
+            // 首先初始化Supabase
+            console.log('开始初始化Supabase...');
+            await initializeSupabase();
+            
             // 初始化主题
             initializeTheme();
             
@@ -3310,7 +4365,7 @@
             window.addEventListener('online', () => {
                 isOnline = true;
                 updateSyncStatus('', '已连接');
-                if (currentUser) {
+                if (currentUser && isSupabaseAvailable) {
                     syncDataFromServer();
                 }
             });
@@ -3326,16 +4381,19 @@
             } catch (error) {
                 console.error('认证系统初始化失败:', error);
                 // Fallback到离线模式
+                showNotification('认证系统异常，使用离线模式', false);
                 loadFromLocalStorage();
                 loadTemplatesFromStorage();
                 renderCalendar();
                 renderScheduleForDate();
                 updateTemplateListDisplay();
-                showNotification('认证失败，使用离线模式', false);
             }
             
             // 事件监听器
             setupEventListeners();
+            
+            // 启用自动备份机制
+            enableAutoBackup();
         });
         
         function setupEventListeners() {
@@ -3350,6 +4408,12 @@
             document.getElementById('addWeekSchedule').addEventListener('click', () => addWeekSchedules(false));
             document.getElementById('addNextWeekSchedule').addEventListener('click', () => addWeekSchedules(true));
             document.getElementById('clearCache').addEventListener('click', clearCache);
+            document.getElementById('clearAll').addEventListener('click', clearAllData);
+            
+            // 数据备份恢复按钮
+            document.getElementById('restoreBackup').addEventListener('click', restoreFromBackup);
+            document.getElementById('createBackup').addEventListener('click', createDataBackup);
+            document.getElementById('forceSyncAll').addEventListener('click', forceSyncAll);
             
             // 删除日程按钮
             document.getElementById('deleteSchedule').addEventListener('click', deleteCurrentSchedule);
@@ -3380,9 +4444,48 @@
             // 认证相关事件监听器
             document.getElementById('authForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                const email = document.getElementById('authEmail').value;
-                const password = document.getElementById('authPassword').value;
-                await handleEmailAuth(email, password);
+                e.stopPropagation(); // 阻止事件冒泡
+                console.log('表单提交事件触发');
+                
+                // 保存输入框的值，防止被清空
+                const emailInput = document.getElementById('authEmail');
+                const passwordInput = document.getElementById('authPassword');
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // 保存到data属性以备恢复
+                emailInput.dataset.lastValue = email;
+                passwordInput.dataset.lastValue = password;
+                
+                console.log('获取到表单数据:', { email: email, password: password ? '***' : '空' });
+                
+                if (!email || !password) {
+                    showAuthError('请填写邮箱和密码');
+                    return;
+                }
+                
+                // 在处理认证前保存值，防止被清空
+                const savedEmail = email;
+                const savedPassword = password;
+                
+                try {
+                    await handleEmailAuth(email, password);
+                } catch (error) {
+                    // 如果认证失败，恢复输入框的值
+                    console.log('认证处理失败，恢复输入框值');
+                    emailInput.value = savedEmail;
+                    passwordInput.value = savedPassword;
+                    throw error;
+                }
+            });
+            
+            // 添加输入框值自动保存
+            document.getElementById('authEmail').addEventListener('input', function(e) {
+                e.target.dataset.lastValue = e.target.value;
+            });
+            
+            document.getElementById('authPassword').addEventListener('input', function(e) {
+                e.target.dataset.lastValue = e.target.value;
             });
             
             document.getElementById('googleAuth').addEventListener('click', handleGoogleAuth);
