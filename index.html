@@ -103,30 +103,12 @@
             margin: 0 auto;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            color: var(--gray-color);
-            font-weight: 300;
-            font-size: 0.9rem;
-        }
-
         /* 主要布局容器 */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 20px;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 40px);
             min-height: 600px;
         }
 
@@ -813,6 +795,115 @@
             }
         }
 
+        /* 设置按钮 */
+        .settings-toggle {
+            position: fixed;
+            bottom: 90px; /* 增加与主题按钮的距离 */
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-500);
+            border: none;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        /* 设置按钮tooltip */
+        .settings-tooltip {
+            position: absolute;
+            bottom: 65px; /* 调整位置，确保不被遮挡 */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1300; /* 提高层级，确保在主题按钮之上 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            min-width: 200px; /* 确保有足够宽度显示完整邮箱 */
+            text-align: center;
+        }
+
+        .settings-toggle:hover .settings-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-8px); /* 增加向上的偏移 */
+        }
+
+        .tooltip-content {
+            text-align: center;
+        }
+
+        .tooltip-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .tooltip-email {
+            font-weight: 500;
+            color: #e5e7eb;
+            word-break: break-all; /* 允许长邮箱地址换行 */
+            max-width: 180px; /* 限制最大宽度 */
+            margin: 0 auto; /* 居中显示 */
+        }
+
+        .tooltip-logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 16px; /* 增加按钮内边距 */
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 4px; /* 增加与邮箱的间距 */
+        }
+
+        .tooltip-logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .tooltip-offline {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* 暗色模式适配 */
+        body[data-theme="dark"] .settings-tooltip {
+            background: rgba(255, 255, 255, 0.95); /* 提高透明度，确保可读性 */
+            color: #1f2937;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        body[data-theme="dark"] .tooltip-email {
+            color: #374151;
+        }
+
+        body[data-theme="dark"] .tooltip-offline {
+            color: #6b7280;
+        }
+
         /* 主题切换按钮 */
         .theme-toggle {
             position: fixed;
@@ -1052,6 +1143,19 @@
                 font-size: 0.8rem;
                 padding: 6px 10px;
             }
+
+            /* 移动端下调整tooltip宽度 */
+            .settings-tooltip {
+                min-width: 180px;
+                max-width: 250px;
+                left: auto;
+                right: 20px;
+                transform: none;
+            }
+
+            .settings-toggle:hover .settings-tooltip {
+                transform: translateY(-8px);
+            }
         }
 
         @media (max-width: 768px) {
@@ -1269,50 +1373,6 @@
             color: #fca5a5;
         }
 
-        .user-info {
-            position: fixed;
-            top: 20px;
-            right: 80px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--gray-700);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(67, 97, 238, 0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-        body[data-theme="dark"] .user-info {
-            background: rgba(45, 45, 45, 0.9);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .user-info.show {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--danger-main);
-            cursor: pointer;
-            font-size: 0.8rem;
-            padding: 2px 6px;
-            border-radius: 3px;
-            transition: all 0.2s ease;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger-main);
-            color: white;
-        }
-
         .sync-status {
             position: fixed;
             bottom: 20px;
@@ -1414,12 +1474,6 @@
         </div>
     </div>
     
-    <!-- 用户信息显示 -->
-    <div class="user-info" id="userInfo">
-        <span id="userEmail">用户邮箱</span>
-        <button class="logout-btn" id="logoutBtn">退出</button>
-    </div>
-    
     <!-- 同步状态指示器 -->
     <div class="sync-status" id="syncStatus">
         <div class="sync-indicator" id="syncIndicator"></div>
@@ -1427,11 +1481,6 @@
     </div>
     
     <div class="container">
-        <header>
-            <h1>智能日程管理</h1>
-            <p class="subtitle">日历视图 | 高效规划每一天 | 按T键切换主题</p>
-        </header>
-
         <div class="main-layout">
             <!-- 左侧任务面板 -->
             <div class="schedule-panel">
@@ -1646,6 +1695,27 @@
         </div>
     </div>
 
+    <!-- 设置按钮 -->
+    <button class="settings-toggle" id="settingsToggle" title="设置">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        
+        <!-- 悬浮显示的用户信息 -->
+        <div class="settings-tooltip" id="settingsTooltip">
+            <div class="tooltip-content">
+                <div class="tooltip-user-info" id="tooltipUserInfo" style="display: none;">
+                    <div class="tooltip-email" id="tooltipUserEmail">用户邮箱</div>
+                    <button class="tooltip-logout-btn" id="tooltipLogoutBtn">退出登录</button>
+                </div>
+                <div class="tooltip-offline" id="tooltipOffline">
+                    <div class="tooltip-text">离线模式</div>
+                </div>
+            </div>
+        </div>
+    </button>
+
     <!-- 主题切换按钮 -->
     <button class="theme-toggle" id="themeToggle" title="切换主题 (T)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1713,6 +1783,10 @@
         async function initializeAuth() {
             console.log('初始化认证系统...');
             
+            // 初始化tooltip状态为离线模式
+            document.getElementById('tooltipUserInfo').style.display = 'none';
+            document.getElementById('tooltipOffline').style.display = 'block';
+            
             // 如果Supabase不可用，跳过认证直接使用离线模式
             if (!isSupabaseAvailable || !supabaseClient) {
                 console.log('Supabase不可用，跳过认证，使用离线模式');
@@ -1766,7 +1840,8 @@
         
         function showAuthModal() {
             document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('userInfo').classList.remove('show');
+            document.getElementById('tooltipUserInfo').style.display = 'none';
+            document.getElementById('tooltipOffline').style.display = 'block';
             document.getElementById('syncStatus').classList.remove('show');
         }
         
@@ -1778,10 +1853,11 @@
             console.log('认证成功:', user.email);
             currentUser = user;
             
-            // 隐藏认证窗口，显示用户信息
+            // 隐藏认证窗口，更新tooltip用户信息
             hideAuthModal();
-            document.getElementById('userEmail').textContent = user.email;
-            document.getElementById('userInfo').classList.add('show');
+            document.getElementById('tooltipUserEmail').textContent = user.email;
+            document.getElementById('tooltipUserInfo').style.display = 'flex';
+            document.getElementById('tooltipOffline').style.display = 'none';
             document.getElementById('syncStatus').classList.add('show');
             
             // 同步数据
@@ -4494,7 +4570,7 @@
                 toggleAuthMode();
             });
             
-            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('tooltipLogoutBtn').addEventListener('click', logout);
             
             // 快捷键支持
             document.addEventListener('keydown', function(event) {
