@@ -1259,13 +1259,251 @@
 
         .schedule-item {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             padding: 6px 8px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
             border-radius: 6px;
             margin: 3px 0;
             transition: all 0.2s ease;
             min-height: 42px;
+        }
+
+        .main-task-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+            min-width: 48px; /* 调整为更合适的宽度 */
+            justify-content: flex-end;
+        }
+
+        .add-subtask-btn {
+            background: var(--primary-100);
+            color: var(--primary-600);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+
+        .add-subtask-btn:hover {
+            background: var(--primary-200);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .subtask-toggle {
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: none;
+            padding: 4px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            min-width: 20px;
+        }
+
+        .subtask-toggle:hover {
+            background: var(--gray-200);
+        }
+
+        .subtask-toggle.expanded {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        .toggle-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+        }
+
+        .subtask-count {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* 只优化子任务容器的显示 */
+        .subtasks-container {
+            margin: 12px 0 8px 40px;
+            border-left: 3px solid var(--primary-color-light);
+            padding-left: 16px;
+            position: relative;
+            animation: slideDown 0.3s ease;
+            background: linear-gradient(90deg, 
+                rgba(67, 97, 238, 0.02) 0%, 
+                transparent 50%
+            );
+            border-radius: 0 6px 6px 0;
+        }
+
+        .subtasks-container::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, 
+                var(--primary-color), 
+                var(--primary-color-light)
+            );
+            border-radius: 2px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 500px;
+            }
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            min-height: 32px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        .subtask-item:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-color-light);
+            transform: translateX(2px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .subtask-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .subtask-checkbox {
+            margin: 0;
+            transform: scale(0.9);
+        }
+
+        .subtask-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        .subtask-input:focus {
+            outline: none;
+            background: rgba(67, 97, 238, 0.05);
+            box-shadow: inset 0 0 0 1px var(--primary-color-light);
+        }
+
+        .subtask-input::placeholder {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .subtask-input.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+            color: var(--text-secondary);
+        }
+
+        .delete-subtask-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger-color);
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .delete-subtask-btn:hover {
+            background: rgba(244, 67, 54, 0.1);
+            color: var(--danger-color);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* 暗色主题适配 */
+        [data-theme="dark"] .add-subtask-btn {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary-300);
+        }
+
+        [data-theme="dark"] .subtask-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gray-300);
+        }
+
+        [data-theme="dark"] .subtask-toggle.expanded {
+            background: rgba(67, 97, 238, 0.2);
+            color: var(--primary-300);
+        }
+
+        [data-theme="dark"] .subtasks-container {
+            background: linear-gradient(90deg, 
+                rgba(67, 97, 238, 0.04) 0%, 
+                transparent 50%
+            );
+        }
+
+        [data-theme="dark"] .subtask-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .subtask-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--primary-color-light);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] .subtask-input:focus {
+            background: rgba(67, 97, 238, 0.06);
+        }
+
+        [data-theme="dark"] .delete-subtask-btn:hover {
+            background: rgba(244, 67, 54, 0.15);
         }
 
         .schedule-item:hover {
@@ -4231,10 +4469,26 @@
             const deleteScheduleEl = document.getElementById('deleteSchedule');
             if (deleteScheduleEl) deleteScheduleEl.style.display = 'inline-flex';
             
-            // 更新进度信息
+            // 更新进度信息（包含子任务）
             const tasksWithContent = selectedSchedule.items.filter(item => item.task.trim() !== '');
-            const completedCount = tasksWithContent.filter(item => item.completed).length;
-            const totalItems = tasksWithContent.length;
+            let completedCount = 0;
+            let totalItems = 0;
+            
+            tasksWithContent.forEach(item => {
+                // 主任务计数
+                totalItems++;
+                if (item.completed) {
+                    completedCount++;
+                }
+                
+                // 子任务计数
+                if (item.subtasks && item.subtasks.length > 0) {
+                    const subtasksWithContent = item.subtasks.filter(st => st.content.trim() !== '');
+                    totalItems += subtasksWithContent.length;
+                    completedCount += subtasksWithContent.filter(st => st.completed).length;
+                }
+            });
+            
             const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
             
             const progressTextEl = document.getElementById('progressText');
@@ -4260,27 +4514,78 @@
                 const scheduleItem = document.createElement('div');
                 scheduleItem.className = 'schedule-item';
                 
+                // 确保子任务数组和展开状态存在
+                if (!item.subtasks) item.subtasks = [];
+                if (item.expanded === undefined) item.expanded = false;
+                
+                // 计算主任务和子任务的完成状态
+                const subtaskCount = item.subtasks.length;
+                const completedSubtasks = item.subtasks.filter(st => st.completed).length;
+                const hasSubtasks = subtaskCount > 0;
+                const allSubtasksCompleted = hasSubtasks ? completedSubtasks === subtaskCount : false;
+                
                 // 只允许今天的任务被勾选
                 const checkboxDisabled = !isToday ? 'disabled' : '';
                 const checkboxTitle = !isToday ? 'title="只能勾选今天的任务"' : '';
                 
                 scheduleItem.innerHTML = `
-                    <label class="checkbox-container">
-                        <input type="checkbox" ${item.completed ? 'checked' : ''} 
-                               ${checkboxDisabled}
-                               ${checkboxTitle}
-                               ${(!item.task || item.task.trim() === '') ? 'disabled' : ''}
-                               onchange="toggleCompleted(${index})">
-                        <span class="checkmark"></span>
-                    </label>
-                    <span class="time">${item.time}</span>
-                    <input type="text" class="task ${item.completed ? 'completed' : ''}" 
-                           value="${item.task}" 
-                           placeholder=""
-                           data-index="${index}"
-                           ${item.completed ? 'readonly' : ''}
-                           onblur="updateTask(${index}, this.value)"
-                           onkeydown="handleTaskKeyDown(event, ${index})">
+                    <div class="main-task-row">
+                        <label class="checkbox-container">
+                            <input type="checkbox" ${item.completed ? 'checked' : ''} 
+                                   ${checkboxDisabled}
+                                   ${checkboxTitle}
+                                   ${(!item.task || item.task.trim() === '') ? 'disabled' : ''}
+                                   onchange="toggleCompleted(${index})">
+                            <span class="checkmark"></span>
+                        </label>
+                        <span class="time">${item.time}</span>
+                        <input type="text" class="task ${item.completed ? 'completed' : ''}" 
+                               value="${item.task}" 
+                               placeholder=""
+                               data-index="${index}"
+                               ${item.completed ? 'readonly' : ''}
+                               onblur="updateTask(${index}, this.value)"
+                               onkeydown="handleTaskKeyDown(event, ${index})">
+                        <div class="task-actions">
+                            ${hasSubtasks ? `
+                                <button class="subtask-toggle ${item.expanded ? 'expanded' : ''}" 
+                                        onclick="toggleSubtasks(${index})"
+                                        title="${item.expanded ? '收起' : '展开'}子任务 (${completedSubtasks}/${subtaskCount})">
+                                    <span class="toggle-icon">${item.expanded ? '▼' : '▶'}</span>
+                                </button>
+                            ` : ''}
+                            <button class="add-subtask-btn" 
+                                    onclick="addSubtask(${index})"
+                                    title="添加子任务">
+                                ＋
+                            </button>
+                        </div>
+                    </div>
+                    ${hasSubtasks && item.expanded ? `
+                        <div class="subtasks-container">
+                            ${item.subtasks.map((subtask, subIndex) => `
+                                <div class="subtask-item" data-subtask-id="${subtask.id}">
+                                    <label class="checkbox-container subtask-checkbox">
+                                        <input type="checkbox" ${subtask.completed ? 'checked' : ''} 
+                                               ${checkboxDisabled}
+                                               onchange="toggleSubtaskCompleted(${index}, ${subIndex})">
+                                        <span class="checkmark"></span>
+                                    </label>
+                                    <input type="text" class="subtask-input ${subtask.completed ? 'completed' : ''}" 
+                                           value="${subtask.content}" 
+                                           placeholder=""
+                                           ${subtask.completed ? 'readonly' : ''}
+                                           onblur="updateSubtask(${index}, ${subIndex}, this.value)"
+                                           onkeydown="handleSubtaskKeyDown(event, ${index}, ${subIndex})">
+                                    <button class="delete-subtask-btn" 
+                                            onclick="deleteSubtask(${index}, ${subIndex})"
+                                            title="删除子任务">
+                                        ×
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                 `;
                 scheduleList.appendChild(scheduleItem);
             });
@@ -4481,6 +4786,292 @@
                     nextInput.select(); // 选中文本以便快速编辑
                 }
             }
+        }
+
+        // ==================== 子任务操作 ====================
+        
+        function addSubtask(mainTaskIndex) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex]) {
+                console.warn('[子任务] 无法添加子任务，主任务不存在');
+                return;
+            }
+            
+            const mainTask = selectedSchedule.items[mainTaskIndex];
+            
+            // 确保子任务数组存在
+            if (!mainTask.subtasks) {
+                mainTask.subtasks = [];
+            }
+            
+            // 创建新的子任务
+            const newSubtask = {
+                id: generateId(),
+                content: '',
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            mainTask.subtasks.push(newSubtask);
+            
+            // 自动展开子任务列表
+            mainTask.expanded = true;
+            
+            console.log(`[子任务] 为主任务 ${mainTaskIndex} 添加了子任务，总计 ${mainTask.subtasks.length} 个子任务`);
+            
+            // 重新渲染
+            renderScheduleForDate();
+            
+            // 聚焦到新添加的子任务输入框
+            setTimeout(() => {
+                const newSubtaskIndex = mainTask.subtasks.length - 1;
+                const newSubtaskInput = document.querySelector(`input.subtask-input[onblur*="${mainTaskIndex}, ${newSubtaskIndex}"]`);
+                if (newSubtaskInput) {
+                    newSubtaskInput.focus();
+                }
+            }, 100);
+            
+            // 保存更改
+            saveToSupabaseDebounced(selectedSchedule.dayId);
+        }
+        
+        function toggleSubtasks(mainTaskIndex) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex]) {
+                return;
+            }
+            
+            const mainTask = selectedSchedule.items[mainTaskIndex];
+            mainTask.expanded = !mainTask.expanded;
+            
+            console.log(`[子任务] 主任务 ${mainTaskIndex} 展开状态: ${mainTask.expanded}`);
+            
+            // 重新渲染
+            renderScheduleForDate();
+            
+            // 保存展开状态
+            saveToSupabaseDebounced(selectedSchedule.dayId);
+        }
+        
+        function toggleSubtaskCompleted(mainTaskIndex, subtaskIndex) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex] || 
+                !selectedSchedule.items[mainTaskIndex].subtasks[subtaskIndex]) {
+                return;
+            }
+            
+            // 检查是否只能勾选今天的任务
+            const today = new Date();
+            const isToday = selectedDate.getFullYear() === today.getFullYear() &&
+                           selectedDate.getMonth() === today.getMonth() &&
+                           selectedDate.getDate() === today.getDate();
+            
+            if (!isToday) {
+                showNotification('只能勾选今天的任务', false);
+                return;
+            }
+            
+            const subtask = selectedSchedule.items[mainTaskIndex].subtasks[subtaskIndex];
+            
+            // 检查子任务内容是否为空
+            if (!subtask.content || subtask.content.trim() === '') {
+                showNotification('请先输入子任务内容再勾选', false);
+                return;
+            }
+            
+            // 切换完成状态
+            subtask.completed = !subtask.completed;
+            
+            console.log(`[子任务] 子任务 ${mainTaskIndex}-${subtaskIndex} 完成状态: ${subtask.completed}`);
+            
+            // 重新渲染（更新进度和状态）
+            renderScheduleForDate();
+            
+            // 检查是否应该自动完成主任务
+            updateMainTaskBasedOnSubtasks(mainTaskIndex);
+            
+            // 保存更改
+            saveToSupabaseDebounced(selectedSchedule.dayId);
+        }
+        
+        function updateSubtask(mainTaskIndex, subtaskIndex, content) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex] || 
+                !selectedSchedule.items[mainTaskIndex].subtasks[subtaskIndex]) {
+                return;
+            }
+            
+            const subtask = selectedSchedule.items[mainTaskIndex].subtasks[subtaskIndex];
+            const oldContent = subtask.content;
+            subtask.content = content.trim();
+            
+            console.log(`[子任务] 更新子任务内容 ${mainTaskIndex}-${subtaskIndex}: "${oldContent}" -> "${subtask.content}"`);
+            
+            // 更新复选框状态（空内容时禁用）
+            setTimeout(() => {
+                const checkbox = document.querySelector(`input[onchange*="toggleSubtaskCompleted(${mainTaskIndex}, ${subtaskIndex})"]`);
+                if (checkbox) {
+                    const isEmpty = !subtask.content || subtask.content.trim() === '';
+                    checkbox.disabled = isEmpty;
+                    
+                    // 如果内容为空，取消勾选状态
+                    if (isEmpty && subtask.completed) {
+                        subtask.completed = false;
+                        checkbox.checked = false;
+                    }
+                }
+            }, 50);
+            
+            // 保存更改
+            saveToSupabaseDebounced(selectedSchedule.dayId);
+        }
+        
+        function deleteSubtask(mainTaskIndex, subtaskIndex) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex] || 
+                !selectedSchedule.items[mainTaskIndex].subtasks[subtaskIndex]) {
+                return;
+            }
+            
+            const mainTask = selectedSchedule.items[mainTaskIndex];
+            const subtask = mainTask.subtasks[subtaskIndex];
+            
+            // 确认删除
+            if (subtask.content && subtask.content.trim() !== '') {
+                if (!confirm(`确定要删除子任务"${subtask.content}"吗？`)) {
+                    return;
+                }
+            }
+            
+            // 删除子任务
+            mainTask.subtasks.splice(subtaskIndex, 1);
+            
+            console.log(`[子任务] 删除子任务 ${mainTaskIndex}-${subtaskIndex}，剩余 ${mainTask.subtasks.length} 个子任务`);
+            
+            // 如果没有子任务了，收起展开状态
+            if (mainTask.subtasks.length === 0) {
+                mainTask.expanded = false;
+            }
+            
+            // 重新渲染
+            renderScheduleForDate();
+            
+            // 保存更改
+            saveToSupabaseDebounced(selectedSchedule.dayId);
+        }
+        
+        function handleSubtaskKeyDown(event, mainTaskIndex, subtaskIndex) {
+            if (event.key === 'Enter') {
+                // 按 Enter 键时保存内容并失去焦点
+                event.preventDefault();
+                const input = event.target;
+                updateSubtask(mainTaskIndex, subtaskIndex, input.value);
+                input.blur();
+            } else if (event.key === 'Tab') {
+                event.preventDefault();
+                
+                if (!selectedSchedule || !selectedSchedule.items) return;
+                
+                const mainTask = selectedSchedule.items[mainTaskIndex];
+                if (!mainTask.subtasks) return;
+                
+                // 尝试跳转到下一个子任务
+                if (subtaskIndex + 1 < mainTask.subtasks.length) {
+                    const nextSubtaskInput = document.querySelector(`input.subtask-input[onblur*="${mainTaskIndex}, ${subtaskIndex + 1}"]`);
+                    if (nextSubtaskInput && !nextSubtaskInput.readOnly) {
+                        nextSubtaskInput.focus();
+                        nextSubtaskInput.select();
+                        return;
+                    }
+                }
+                
+                // 如果没有下一个子任务，跳转到下一个主任务
+                let nextMainIndex = mainTaskIndex + 1;
+                let attempts = 0;
+                
+                while (attempts < selectedSchedule.items.length) {
+                    if (nextMainIndex >= selectedSchedule.items.length) {
+                        nextMainIndex = 0;
+                    }
+                    
+                    const nextMainTask = selectedSchedule.items[nextMainIndex];
+                    if (!nextMainTask.completed) {
+                        const nextMainInput = document.querySelector(`input.task[data-index="${nextMainIndex}"]`);
+                        if (nextMainInput && !nextMainInput.readOnly) {
+                            nextMainInput.focus();
+                            nextMainInput.select();
+                            return;
+                        }
+                    }
+                    
+                    nextMainIndex++;
+                    attempts++;
+                }
+            } else if (event.key === 'Delete' && event.ctrlKey) {
+                // Ctrl+Delete 快速删除子任务
+                event.preventDefault();
+                deleteSubtask(mainTaskIndex, subtaskIndex);
+            }
+        }
+        
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // 检查主任务是否应该根据子任务状态自动完成
+        function updateMainTaskBasedOnSubtasks(mainTaskIndex) {
+            if (!selectedSchedule || !selectedSchedule.items[mainTaskIndex]) {
+                return;
+            }
+            
+            const mainTask = selectedSchedule.items[mainTaskIndex];
+            
+            // 如果没有子任务，不需要更新
+            if (!mainTask.subtasks || mainTask.subtasks.length === 0) {
+                return;
+            }
+            
+            // 只考虑有内容的子任务
+            const subtasksWithContent = mainTask.subtasks.filter(st => st.content && st.content.trim() !== '');
+            
+            if (subtasksWithContent.length === 0) {
+                return;
+            }
+            
+            // 检查所有有内容的子任务是否都已完成
+            const allSubtasksCompleted = subtasksWithContent.every(st => st.completed);
+            const anySubtaskCompleted = subtasksWithContent.some(st => st.completed);
+            
+            // 智能更新主任务状态的策略：
+            // 1. 如果所有子任务都完成，且主任务有内容，则主任务也标记为完成
+            // 2. 如果有子任务但没有一个完成，且主任务之前是完成状态，则取消主任务完成
+            const hasMainTaskContent = mainTask.task && mainTask.task.trim() !== '';
+            
+            if (allSubtasksCompleted && hasMainTaskContent && !mainTask.completed) {
+                console.log(`[自动完成] 所有子任务已完成，自动完成主任务 ${mainTaskIndex}`);
+                mainTask.completed = true;
+                
+                // 显示智能提示
+                showNotification(`主任务"${mainTask.task}"的所有子任务已完成，已自动标记为完成`, true);
+                
+                // 重新渲染
+                renderScheduleForDate();
+                
+                // 保存更改
+                saveToSupabaseDebounced(selectedSchedule.dayId);
+            }
+        }
+        
+        // 计算子任务进度百分比
+        function calculateSubtaskProgress(subtasks) {
+            if (!subtasks || subtasks.length === 0) {
+                return { completed: 0, total: 0, percentage: 0 };
+            }
+            
+            const subtasksWithContent = subtasks.filter(st => st.content && st.content.trim() !== '');
+            const completedSubtasks = subtasksWithContent.filter(st => st.completed);
+            
+            return {
+                completed: completedSubtasks.length,
+                total: subtasksWithContent.length,
+                percentage: subtasksWithContent.length > 0 ? 
+                    Math.round((completedSubtasks.length / subtasksWithContent.length) * 100) : 0
+            };
         }
 
         // ==================== 日程创建 ====================
@@ -4848,7 +5439,9 @@
                 slots.push({
                     time: timeSlot,
                     task: taskContent,
-                    completed: false
+                    completed: false,
+                    subtasks: [],
+                    expanded: false
                 });
             }
             
