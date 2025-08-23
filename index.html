@@ -1502,8 +1502,759 @@
             background: rgba(67, 97, 238, 0.06);
         }
 
-        [data-theme="dark"] .delete-subtask-btn:hover {
-            background: rgba(244, 67, 54, 0.15);
+        /* ==================== 逼真小橘猫样式 ==================== */
+        .pet-container {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1500;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: none;
+        }
+
+        .pet-sprite {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            pointer-events: all;
+            transform-origin: center bottom;
+        }
+
+        .pet-main-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ========== 头部样式 ========== */
+        .pet-head {
+            position: absolute;
+            bottom: 60px;
+            left: 35px;
+            width: 50px;
+            height: 45px;
+        }
+
+        .pet-head-main {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9500 0%, #ff7b00 50%, #e55100 100%);
+            border-radius: 50% 50% 45% 45%;
+            box-shadow: 
+                inset -3px -3px 8px rgba(0,0,0,0.1),
+                inset 3px 3px 8px rgba(255,255,255,0.3),
+                0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 额头花纹 */
+        .pet-forehead-pattern {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 15px;
+            background: #d84315;
+            border-radius: 50% 50% 80% 80%;
+            opacity: 0.6;
+        }
+
+        .pet-forehead-pattern::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: -8px;
+            width: 6px;
+            height: 8px;
+            background: #d84315;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        .pet-forehead-pattern::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: -8px;
+            width: 6px;
+            height: 8px;
+            background: #d84315;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+
+        /* ========== 耳朵样式 ========== */
+        .pet-ears {
+            position: absolute;
+            top: -8px;
+            left: 0;
+            right: 0;
+        }
+
+        .pet-ear {
+            position: absolute;
+            width: 18px;
+            height: 20px;
+            background: linear-gradient(135deg, #ff9500 0%, #e55100 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .pet-ear-left {
+            top: 0;
+            left: 8px;
+            transform: rotate(-15deg);
+        }
+
+        .pet-ear-right {
+            top: 0;
+            right: 8px;
+            transform: rotate(15deg);
+        }
+
+        .pet-ear-inner {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 12px;
+            background: #ffab40;
+            clip-path: polygon(50% 0%, 20% 100%, 80% 100%);
+        }
+
+        /* ========== 眼睛样式 ========== */
+        .pet-eyes {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 12px;
+        }
+
+        .pet-eye {
+            width: 12px;
+            height: 10px;
+            position: relative;
+        }
+
+        .pet-eyeball {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #2e7d32;
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 -2px 3px rgba(0,0,0,0.2),
+                0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .pet-pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .pet-eye-shine {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.9;
+        }
+
+        .pet-eyelid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            background: linear-gradient(135deg, #ff9500 0%, #e55100 100%);
+            border-radius: 50%;
+            transition: height 0.15s ease;
+            overflow: hidden;
+        }
+
+        /* ========== 鼻子样式 ========== */
+        .pet-nose {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 6px;
+        }
+
+        .pet-nose-tip {
+            position: absolute;
+            width: 6px;
+            height: 4px;
+            background: #ff1744;
+            border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+            box-shadow: 
+                inset 0 -1px 2px rgba(0,0,0,0.2),
+                0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .pet-nose-line {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 4px;
+            background: #d84315;
+            border-radius: 1px;
+        }
+
+        /* ========== 嘴巴样式 ========== */
+        .pet-mouth {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+        }
+
+        .pet-mouth-left {
+            position: absolute;
+            left: 0;
+            width: 6px;
+            height: 3px;
+            border: 1px solid #d84315;
+            border-top: none;
+            border-radius: 0 0 0 8px;
+            border-right: none;
+        }
+
+        .pet-mouth-right {
+            position: absolute;
+            right: 0;
+            width: 6px;
+            height: 3px;
+            border: 1px solid #d84315;
+            border-top: none;
+            border-radius: 0 0 8px 0;
+            border-left: none;
+        }
+
+        /* ========== 胡须样式 ========== */
+        .pet-whiskers {
+            position: absolute;
+            top: 20px;
+        }
+
+        .pet-whiskers-left {
+            left: -8px;
+        }
+
+        .pet-whiskers-right {
+            right: -8px;
+        }
+
+        .pet-whisker {
+            position: absolute;
+            width: 12px;
+            height: 1px;
+            background: #424242;
+            border-radius: 1px;
+            opacity: 0.8;
+        }
+
+        .pet-whiskers-left .pet-whisker:nth-child(1) {
+            top: 0;
+            transform: rotate(-10deg);
+        }
+
+        .pet-whiskers-left .pet-whisker:nth-child(2) {
+            top: 4px;
+            transform: rotate(0deg);
+        }
+
+        .pet-whiskers-left .pet-whisker:nth-child(3) {
+            top: 8px;
+            transform: rotate(10deg);
+        }
+
+        .pet-whiskers-right .pet-whisker:nth-child(1) {
+            top: 0;
+            transform: rotate(10deg);
+        }
+
+        .pet-whiskers-right .pet-whisker:nth-child(2) {
+            top: 4px;
+            transform: rotate(0deg);
+        }
+
+        .pet-whiskers-right .pet-whisker:nth-child(3) {
+            top: 8px;
+            transform: rotate(-10deg);
+        }
+
+        /* ========== 脸颊样式 ========== */
+        .pet-cheeks {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+        }
+
+        .pet-cheek {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffab40;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .pet-cheek-left {
+            left: 2px;
+        }
+
+        .pet-cheek-right {
+            right: 2px;
+        }
+
+        /* ========== 身体样式 ========== */
+        .pet-body-main {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            width: 60px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff9500 0%, #ff7b00 50%, #e55100 100%);
+            border-radius: 50% 50% 60% 40%;
+            box-shadow: 
+                inset -2px -2px 6px rgba(0,0,0,0.1),
+                inset 2px 2px 6px rgba(255,255,255,0.3),
+                0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* 胸部白毛 */
+        .pet-chest {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50% 50% 70% 30%;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        }
+
+        /* 身体花纹 */
+        .pet-body-stripes {
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            right: 8px;
+            height: 35px;
+        }
+
+        .pet-stripe {
+            position: absolute;
+            height: 3px;
+            background: #d84315;
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+
+        .pet-stripe:nth-child(1) {
+            top: 5px;
+            left: 5px;
+            width: 15px;
+            transform: rotate(-10deg);
+        }
+
+        .pet-stripe:nth-child(2) {
+            top: 12px;
+            left: 8px;
+            width: 12px;
+            transform: rotate(5deg);
+        }
+
+        .pet-stripe:nth-child(3) {
+            top: 19px;
+            left: 6px;
+            width: 14px;
+            transform: rotate(-5deg);
+        }
+
+        /* ========== 前腿样式 ========== */
+        .pet-front-legs {
+            position: absolute;
+            bottom: 5px;
+            left: 35px;
+            width: 50px;
+            height: 25px;
+        }
+
+        .pet-leg {
+            position: absolute;
+            width: 12px;
+            height: 20px;
+            background: linear-gradient(180deg, #ff9500 0%, #ff7b00 100%);
+            border-radius: 8px 8px 6px 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .pet-front-leg-left {
+            left: 8px;
+        }
+
+        .pet-front-leg-right {
+            right: 8px;
+        }
+
+        .pet-paw {
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 8px;
+            background: #ffab40;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        .pet-paw::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 4px;
+            background: #ff7043;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        /* ========== 尾巴样式 ========== */
+        .pet-tail {
+            position: absolute;
+            bottom: 35px;
+            right: 10px;
+            width: 40px;
+            height: 60px;
+            transform-origin: bottom left;
+        }
+
+        .pet-tail-base {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 12px;
+            height: 25px;
+            background: linear-gradient(135deg, #ff9500 0%, #e55100 100%);
+            border-radius: 8px;
+            transform: rotate(-20deg);
+        }
+
+        .pet-tail-middle {
+            position: absolute;
+            bottom: 20px;
+            left: 8px;
+            width: 10px;
+            height: 20px;
+            background: linear-gradient(135deg, #ff9500 0%, #e55100 100%);
+            border-radius: 6px;
+            transform: rotate(10deg);
+        }
+
+        .pet-tail-tip {
+            position: absolute;
+            bottom: 35px;
+            left: 15px;
+            width: 8px;
+            height: 15px;
+            background: linear-gradient(135deg, #ff9500 0%, #e55100 100%);
+            border-radius: 50% 50% 60% 60%;
+            transform: rotate(30deg);
+        }
+
+        /* 尾巴花纹 */
+        .pet-tail-stripes {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+        }
+
+        .pet-tail-stripe {
+            position: absolute;
+            width: 8px;
+            height: 2px;
+            background: #d84315;
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        .pet-tail-stripe:nth-child(1) {
+            bottom: 8px;
+            left: 2px;
+            transform: rotate(-20deg);
+        }
+
+        .pet-tail-stripe:nth-child(2) {
+            bottom: 25px;
+            left: 10px;
+            transform: rotate(10deg);
+        }
+
+        .pet-tail-stripe:nth-child(3) {
+            bottom: 40px;
+            left: 17px;
+            transform: rotate(30deg);
+        }
+
+        /* ========== UI 元素样式 ========== */
+        .pet-level-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 2px solid #fff;
+        }
+
+        .pet-xp-bar {
+            position: absolute;
+            bottom: -8px;
+            left: 10px;
+            right: 10px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .pet-xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 6px rgba(76,175,80,0.5);
+        }
+
+        /* ========== 宠物动画效果 ========== */
+        .pet-sprite.bouncing {
+            animation: petBounce 0.6s ease-in-out;
+        }
+
+        .pet-sprite.leveling {
+            animation: petLevelUp 1s ease-in-out;
+        }
+
+        @keyframes petBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.05); }
+        }
+
+        @keyframes petLevelUp {
+            0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-3deg); filter: hue-rotate(90deg); }
+            50% { transform: scale(0.95) rotate(3deg); filter: hue-rotate(180deg); }
+            75% { transform: scale(1.05) rotate(-1deg); filter: hue-rotate(270deg); }
+            100% { transform: scale(1) rotate(0deg); filter: hue-rotate(360deg); }
+        }
+
+        /* 眨眼动画 */
+        .pet-sprite.idle-blink .pet-eyelid {
+            height: 100%;
+            animation: blinkLid 0.3s ease-in-out;
+        }
+
+        @keyframes blinkLid {
+            0%, 100% { height: 0%; }
+            50% { height: 100%; }
+        }
+
+        /* 耳朵动画 */
+        .pet-sprite.idle-ear-wiggle .pet-ear-left {
+            animation: earWiggleLeft 0.8s ease-in-out;
+        }
+
+        .pet-sprite.idle-ear-wiggle .pet-ear-right {
+            animation: earWiggleRight 0.8s ease-in-out;
+        }
+
+        @keyframes earWiggleLeft {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(-25deg); }
+        }
+
+        @keyframes earWiggleRight {
+            0%, 100% { transform: rotate(15deg); }
+            50% { transform: rotate(25deg); }
+        }
+
+        /* 尾巴摆动动画 */
+        .pet-sprite.idle-tail-wag .pet-tail {
+            animation: tailWagRealistic 1s ease-in-out;
+        }
+
+        @keyframes tailWagRealistic {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* 移动动画 */
+        .pet-sprite.moving .pet-main-body {
+            animation: catWalk 0.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes catWalk {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-2px); }
+        }
+
+        /* 呼吸动画 */
+        .pet-main-body {
+            animation: catBreathe 3s ease-in-out infinite;
+        }
+
+        @keyframes catBreathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* 暗色主题适配 */
+        [data-theme="dark"] .pet-head-main,
+        [data-theme="dark"] .pet-body-main {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #5e35b1 100%);
+        }
+
+        [data-theme="dark"] .pet-ear {
+            background: linear-gradient(135deg, #667eea 0%, #5e35b1 100%);
+        }
+
+        [data-theme="dark"] .pet-tail-base,
+        [data-theme="dark"] .pet-tail-middle,
+        [data-theme="dark"] .pet-tail-tip {
+            background: linear-gradient(135deg, #667eea 0%, #5e35b1 100%);
+        }
+
+        [data-theme="dark"] .pet-leg {
+            background: linear-gradient(180deg, #667eea 0%, #5e35b1 100%);
+        }
+
+        /* 额外的交互动画 */
+        .pet-static {
+            pointer-events: auto !important;
+        }
+
+        @keyframes petTeleport {
+            0% { 
+                transform: scale(1) rotateY(0deg);
+                filter: hue-rotate(0deg);
+            }
+            50% { 
+                transform: scale(0.8) rotateY(180deg);
+                filter: hue-rotate(180deg);
+            }
+            100% { 
+                transform: scale(1) rotateY(360deg);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        /* 浮动经验值特效 */
+        .pet-floating-xp {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #4caf50;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUpXP 1.5s ease-out forwards;
+        }
+
+        @keyframes floatUpXP {
+            0% { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(0px) scale(1); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(-10px) scale(1.2); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(-40px) scale(0.8); 
+            }
+        }
+
+        /* 宠物右键菜单 */
+        .pet-context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            min-width: 140px;
+            font-size: 14px;
+        }
+
+        .context-menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        [data-theme="dark"] .pet-context-menu {
+            background: #333;
+            border-color: #555;
+        }
+
+        [data-theme="dark"] .context-menu-item {
+            border-bottom-color: #444;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .context-menu-item:hover {
+            background-color: #444;
         }
 
         .schedule-item:hover {
@@ -2487,6 +3238,141 @@
 </head>
 <body>
     <div class="notification" id="notification"></div>
+    
+    <!-- 逼真虚拟宠物 - 小橘猫 -->
+    <div class="pet-container" id="petContainer">
+        <div class="pet-sprite" onclick="petInteraction()" oncontextmenu="showPetContextMenu(event)">
+            <!-- 宠物主体 -->
+            <div class="pet-main-body">
+                <!-- 头部 -->
+                <div class="pet-head">
+                    <!-- 耳朵 -->
+                    <div class="pet-ears">
+                        <div class="pet-ear pet-ear-left">
+                            <div class="pet-ear-inner"></div>
+                        </div>
+                        <div class="pet-ear pet-ear-right">
+                            <div class="pet-ear-inner"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 头部主体 -->
+                    <div class="pet-head-main">
+                        <!-- 额头花纹 -->
+                        <div class="pet-forehead-pattern"></div>
+                        
+                        <!-- 眼睛 -->
+                        <div class="pet-eyes">
+                            <div class="pet-eye pet-eye-left">
+                                <div class="pet-eyeball">
+                                    <div class="pet-pupil"></div>
+                                    <div class="pet-eye-shine"></div>
+                                </div>
+                                <div class="pet-eyelid"></div>
+                            </div>
+                            <div class="pet-eye pet-eye-right">
+                                <div class="pet-eyeball">
+                                    <div class="pet-pupil"></div>
+                                    <div class="pet-eye-shine"></div>
+                                </div>
+                                <div class="pet-eyelid"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 鼻子 -->
+                        <div class="pet-nose">
+                            <div class="pet-nose-tip"></div>
+                            <div class="pet-nose-line"></div>
+                        </div>
+                        
+                        <!-- 嘴巴 -->
+                        <div class="pet-mouth">
+                            <div class="pet-mouth-left"></div>
+                            <div class="pet-mouth-right"></div>
+                        </div>
+                        
+                        <!-- 胡须 -->
+                        <div class="pet-whiskers pet-whiskers-left">
+                            <div class="pet-whisker"></div>
+                            <div class="pet-whisker"></div>
+                            <div class="pet-whisker"></div>
+                        </div>
+                        <div class="pet-whiskers pet-whiskers-right">
+                            <div class="pet-whisker"></div>
+                            <div class="pet-whisker"></div>
+                            <div class="pet-whisker"></div>
+                        </div>
+                        
+                        <!-- 脸颊 -->
+                        <div class="pet-cheeks">
+                            <div class="pet-cheek pet-cheek-left"></div>
+                            <div class="pet-cheek pet-cheek-right"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 身体 -->
+                <div class="pet-body-main">
+                    <!-- 胸部白毛 -->
+                    <div class="pet-chest"></div>
+                    <!-- 身体花纹 -->
+                    <div class="pet-body-stripes">
+                        <div class="pet-stripe"></div>
+                        <div class="pet-stripe"></div>
+                        <div class="pet-stripe"></div>
+                    </div>
+                </div>
+                
+                <!-- 前腿 -->
+                <div class="pet-front-legs">
+                    <div class="pet-leg pet-front-leg-left">
+                        <div class="pet-paw"></div>
+                    </div>
+                    <div class="pet-leg pet-front-leg-right">
+                        <div class="pet-paw"></div>
+                    </div>
+                </div>
+                
+                <!-- 尾巴 -->
+                <div class="pet-tail">
+                    <div class="pet-tail-base"></div>
+                    <div class="pet-tail-middle"></div>
+                    <div class="pet-tail-tip"></div>
+                    <!-- 尾巴花纹 -->
+                    <div class="pet-tail-stripes">
+                        <div class="pet-tail-stripe"></div>
+                        <div class="pet-tail-stripe"></div>
+                        <div class="pet-tail-stripe"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- UI 元素 -->
+            <div class="pet-level-badge" id="petLevel">1</div>
+            <div class="pet-xp-bar">
+                <div class="pet-xp-fill" id="petXPFill" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 宠物右键菜单 -->
+    <div class="pet-context-menu" id="petContextMenu" style="display: none;">
+        <div class="context-menu-item" onclick="togglePetFollowing()">
+            <span id="followText">👆 智能跟随</span>
+        </div>
+        <div class="context-menu-item" onclick="petTeleport()">
+            ⚡ 瞬移过来
+        </div>
+        <div class="context-menu-item" onclick="petStats()">
+            📊 查看状态
+        </div>
+        <div class="context-menu-item" onclick="togglePetCollapse()">
+            📦 收起/展开
+        </div>
+        <div class="context-menu-item" onclick="resetPet()">
+            🔄 重置宠物
+        </div>
+    </div>
     
     <!-- 用户认证模态框 -->
     <div class="auth-modal" id="authModal">
@@ -4680,6 +5566,11 @@
                 console.log('新状态:', selectedSchedule.items[index].completed);
                 console.log('当前日程数据:', selectedSchedule);
                 
+                // 宠物系统：主任务完成获得经验值
+                if (selectedSchedule.items[index].completed) {
+                    petGainXP(5, '完成主任务'); // 主任务奖励5经验
+                }
+                
                 // 先更新任务列表显示
                 renderScheduleForDate();
                 
@@ -4880,6 +5771,11 @@
             subtask.completed = !subtask.completed;
             
             console.log(`[子任务] 子任务 ${mainTaskIndex}-${subtaskIndex} 完成状态: ${subtask.completed}`);
+            
+            // 宠物系统：子任务完成获得经验值
+            if (subtask.completed) {
+                petGainXP(3, '完成子任务'); // 子任务奖励3经验
+            }
             
             // 重新渲染（更新进度和状态）
             renderScheduleForDate();
@@ -5655,7 +6551,798 @@
             }
         }
 
-        // ==================== 主题切换 ====================
+        // ==================== 虚拟宠物系统 ====================
+        
+        // 宠物数据结构
+        let petData = {
+            name: '小猫咪',
+            level: 1,
+            xp: 0,
+            maxXP: 100,
+            mood: '开心',
+            sprite: '🐱',
+            totalTasksCompleted: 0,
+            createdDate: new Date().toISOString(),
+            lastFeedTime: null,
+            evolution: 0 // 进化阶段：0=小猫, 1=大猫, 2=超级猫
+        };
+        
+        // 宠物音效（简单的音效模拟）
+        const petSounds = {
+            gainXP: () => playTone(200, 0.1),
+            levelUp: () => {
+                playTone(300, 0.1);
+                setTimeout(() => playTone(400, 0.1), 100);
+                setTimeout(() => playTone(500, 0.1), 200);
+            },
+            interaction: () => playTone(350, 0.05),
+            evolve: () => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => playTone(400 + i * 50, 0.1), i * 100);
+                }
+            }
+        };
+        
+        // 播放简单音调
+        function playTone(frequency, duration) {
+            if (!window.AudioContext && !window.webkitAudioContext) return;
+            
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + duration);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + duration);
+            } catch (error) {
+                console.log('音效播放失败:', error);
+            }
+        }
+        
+        // 初始化宠物系统
+        function initPetSystem() {
+            const savedPetData = localStorage.getItem('petData');
+            if (savedPetData) {
+                try {
+                    petData = { ...petData, ...JSON.parse(savedPetData) };
+                } catch (error) {
+                    console.log('宠物数据加载失败，使用默认数据');
+                }
+            }
+            
+            updatePetDisplay();
+            
+            // 每隔一段时间检查宠物状态
+            setInterval(updatePetMood, 30000); // 30秒更新一次心情
+        }
+        
+        // 更新宠物显示
+        function updatePetDisplay() {
+            const petName = document.getElementById('petName');
+            const petLevel = document.getElementById('petLevel');
+            const petSprite = document.getElementById('petSprite');
+            const petXPFill = document.getElementById('petXPFill');
+            const petXPText = document.getElementById('petXPText');
+            const petMood = document.getElementById('petMood');
+            
+            if (petName) petName.textContent = petData.name;
+            if (petLevel) petLevel.textContent = `Lv.${petData.level}`;
+            if (petXPFill) {
+                const xpPercent = (petData.xp / petData.maxXP) * 100;
+                petXPFill.style.width = `${xpPercent}%`;
+            }
+            if (petXPText) petXPText.textContent = `${petData.xp} / ${petData.maxXP} XP`;
+            if (petMood) petMood.textContent = getPetMoodDisplay();
+            
+            // 根据等级更新宠物外观
+            if (petSprite) {
+                const spriteEmoji = getPetSprite();
+                const emojiElement = petSprite.childNodes[0];
+                if (emojiElement && emojiElement.nodeType === Node.TEXT_NODE) {
+                    emojiElement.textContent = spriteEmoji;
+                }
+            }
+        }
+        
+        // 获取宠物外观
+        function getPetSprite() {
+            const sprites = {
+                0: { // 小猫阶段
+                    1: '🐱', 5: '😺', 10: '😸', 15: '😻'
+                },
+                1: { // 大猫阶段
+                    20: '🦁', 25: '🐯', 30: '🐆'
+                },
+                2: { // 传说阶段
+                    35: '🦄', 40: '🐉', 50: '👑'
+                }
+            };
+            
+            const evolution = Math.floor(petData.level / 20);
+            const evolutionSprites = sprites[Math.min(evolution, 2)];
+            
+            // 找到当前等级对应的最高外观
+            let currentSprite = petData.sprite;
+            for (const [levelThreshold, sprite] of Object.entries(evolutionSprites)) {
+                if (petData.level >= parseInt(levelThreshold)) {
+                    currentSprite = sprite;
+                }
+            }
+            
+            return currentSprite;
+        }
+        
+        // 获取宠物心情显示
+        function getPetMoodDisplay() {
+            const moods = [
+                { threshold: 0, mood: '😴 困倦', emoji: '😴' },
+                { threshold: 5, mood: '😊 开心', emoji: '😊' },
+                { threshold: 10, mood: '😆 兴奋', emoji: '😆' },
+                { threshold: 20, mood: '🤩 超级开心', emoji: '🤩' },
+                { threshold: 30, mood: '👑 威严', emoji: '👑' }
+            ];
+            
+            for (let i = moods.length - 1; i >= 0; i--) {
+                if (petData.level >= moods[i].threshold) {
+                    return moods[i].mood;
+                }
+            }
+            
+            return '😊 开心';
+        }
+        
+        // 宠物获得经验值
+        function petGainXP(xpAmount, source = '完成任务') {
+            console.log(`[宠物] ${petData.name} 通过"${source}"获得 ${xpAmount} 经验值`);
+            
+            const oldLevel = petData.level;
+            petData.xp += xpAmount;
+            petData.totalTasksCompleted++;
+            
+            // 播放获得经验音效
+            petSounds.gainXP();
+            
+            // 显示浮动经验值
+            showFloatingXP(xpAmount);
+            
+            // 触发弹跳动画
+            const petSprite = document.getElementById('petSprite');
+            if (petSprite) {
+                petSprite.classList.add('bouncing');
+                setTimeout(() => petSprite.classList.remove('bouncing'), 600);
+            }
+            
+            // 检查升级
+            while (petData.xp >= petData.maxXP) {
+                levelUp();
+            }
+            
+            // 更新显示
+            updatePetDisplay();
+            savePetData();
+            
+            // 如果升级了，显示特殊消息
+            if (petData.level > oldLevel) {
+                const levelDiff = petData.level - oldLevel;
+                showNotification(`${petData.name} 升级了！现在是 ${petData.level} 级！${levelDiff > 1 ? `连升${levelDiff}级！` : ''}`, true);
+            }
+        }
+        
+        // 升级处理
+        function levelUp() {
+            petData.level++;
+            petData.xp -= petData.maxXP;
+            petData.maxXP = Math.floor(petData.maxXP * 1.2); // 每级经验需求增加20%
+            
+            console.log(`[宠物] ${petData.name} 升级到 ${petData.level} 级！`);
+            
+            // 播放升级音效
+            petSounds.levelUp();
+            
+            // 升级动画
+            const petSprite = document.getElementById('petSprite');
+            if (petSprite) {
+                petSprite.classList.add('leveling');
+                setTimeout(() => petSprite.classList.remove('leveling'), 1000);
+            }
+            
+            // 检查是否需要进化
+            const oldEvolution = Math.floor((petData.level - 1) / 20);
+            const newEvolution = Math.floor(petData.level / 20);
+            
+            if (newEvolution > oldEvolution && newEvolution <= 2) {
+                setTimeout(() => petEvolve(newEvolution), 1000);
+            }
+        }
+        
+        // 宠物进化
+        function petEvolve(evolutionStage) {
+            petData.evolution = evolutionStage;
+            
+            const evolutionNames = ['小猫咪', '大猫咪', '传说猫咪'];
+            const newName = evolutionNames[evolutionStage] || petData.name;
+            
+            if (newName !== petData.name) {
+                petData.name = newName;
+                petSounds.evolve();
+                
+                showNotification(`🎉 进化成功！${petData.name} 进化成了 ${newName}！`, true);
+                
+                // 进化特效
+                const petContainer = document.getElementById('petContainer');
+                if (petContainer) {
+                    petContainer.style.animation = 'petLevelUp 2s ease-in-out';
+                    setTimeout(() => petContainer.style.animation = '', 2000);
+                }
+            }
+        }
+        
+        // 显示浮动经验值
+        function showFloatingXP(xpAmount) {
+            const petContainer = document.getElementById('petContainer');
+            if (!petContainer) return;
+            
+            const floatingXP = document.createElement('div');
+            floatingXP.className = 'pet-floating-xp';
+            floatingXP.textContent = `+${xpAmount} XP`;
+            
+            petContainer.appendChild(floatingXP);
+            
+            // 1.5秒后移除
+            setTimeout(() => {
+                if (petContainer.contains(floatingXP)) {
+                    petContainer.removeChild(floatingXP);
+                }
+            }, 1500);
+        }
+        
+        // 宠物交互
+        function petInteraction() {
+            petSounds.interaction();
+            
+            const petSprite = document.getElementById('petSprite');
+            if (petSprite) {
+                petSprite.classList.add('bouncing');
+                setTimeout(() => petSprite.classList.remove('bouncing'), 600);
+            }
+            
+            const interactions = [
+                '你摸了摸小猫，它很开心！',
+                '小猫对你喵了一声~',
+                '小猫蹭了蹭你的手',
+                '你给小猫挠了挠下巴',
+                '小猫在你手心里打呼噜'
+            ];
+            
+            const randomInteraction = interactions[Math.floor(Math.random() * interactions.length)];
+            showNotification(randomInteraction, true);
+            
+            // 小概率获得经验值
+            if (Math.random() < 0.3) {
+                petGainXP(1, '互动');
+            }
+        }
+        
+        // 切换宠物面板收起/展开
+        function togglePetCollapse() {
+            const petContainer = document.getElementById('petContainer');
+            if (petContainer) {
+                petContainer.classList.toggle('pet-collapsed');
+                
+                // 保存状态
+                const isCollapsed = petContainer.classList.contains('pet-collapsed');
+                localStorage.setItem('petCollapsed', isCollapsed);
+            }
+        }
+        
+        // 显示宠物详细状态
+        function petStats() {
+            const stats = `
+            🐱 ${petData.name} 的详细状态
+            等级：${petData.level}
+            经验值：${petData.xp} / ${petData.maxXP}
+            总完成任务：${petData.totalTasksCompleted}
+            创建日期：${new Date(petData.createdDate).toLocaleDateString()}
+            进化阶段：${petData.evolution}
+            
+            ${getAchievementText()}
+            `;
+            
+            showNotification('宠物状态', true, stats);
+        }
+        
+        // 获取成就文本
+        function getAchievementText() {
+            const achievements = [];
+            
+            if (petData.totalTasksCompleted >= 10) achievements.push('🏆 任务新手');
+            if (petData.totalTasksCompleted >= 50) achievements.push('🏅 任务专家');
+            if (petData.totalTasksCompleted >= 100) achievements.push('👑 任务大师');
+            if (petData.level >= 10) achievements.push('⭐ 等级达人');
+            if (petData.level >= 25) achievements.push('🌟 传奇宠物');
+            if (petData.evolution >= 1) achievements.push('🦋 进化成功');
+            
+            return achievements.length > 0 ? 
+                `成就：${achievements.join(' ')}` : 
+                '继续完成任务来解锁成就吧！';
+        }
+        
+        // 更新宠物心情
+        function updatePetMood() {
+            // 根据最近的任务完成情况调整心情
+            const now = new Date();
+            const todaySchedule = schedules.find(s => {
+                const scheduleDate = parseScheduleDate(s.date);
+                return scheduleDate.toDateString() === now.toDateString();
+            });
+            
+            if (todaySchedule) {
+                const completedTasks = todaySchedule.items.filter(item => 
+                    item.completed && item.task.trim() !== ''
+                ).length;
+                
+                if (completedTasks > 0) {
+                    petData.mood = '开心';
+                } else if (now.getHours() > 18) {
+                    petData.mood = '有点困';
+                }
+            }
+            
+            updatePetDisplay();
+        }
+        
+        // 保存宠物数据
+        function savePetData() {
+            try {
+                localStorage.setItem('petData', JSON.stringify(petData));
+            } catch (error) {
+                console.log('宠物数据保存失败:', error);
+            }
+        }
+        
+        // ==================== 动态宠物系统 - 智能跟随 ====================
+        
+        let mousePosition = { x: 0, y: 0 };
+        let petPosition = { x: window.innerWidth - 120, y: window.innerHeight - 120 };
+        let isFollowing = false; // 默认不跟随，避免干扰操作
+        let petAnimationFrame;
+        let lastUserActivity = Date.now();
+        let isUserInteracting = false;
+        let idleTimeout = null;
+        let interactionElements = [];
+        
+        // 定义交互元素选择器（这些元素活跃时宠物应该停止跟随）
+        const INTERACTIVE_SELECTORS = [
+            'input', 'textarea', 'button', 'select', '.task', '.calendar-day',
+            '.schedule-item', '.template-item', '.auth-input', '.context-menu-item'
+        ];
+        
+        // 智能鼠标跟踪系统
+        function initMouseTracking() {
+            // 鼠标移动事件
+            document.addEventListener('mousemove', (e) => {
+                mousePosition.x = e.clientX;
+                mousePosition.y = e.clientY;
+                lastUserActivity = Date.now();
+                
+                // 检查是否在交互元素上
+                const elementUnderMouse = document.elementFromPoint(e.clientX, e.clientY);
+                const wasInteracting = isUserInteracting;
+                isUserInteracting = checkIfInteracting(elementUnderMouse);
+                
+                // 如果从交互状态变为非交互状态，延迟一下再开始跟随
+                if (wasInteracting && !isUserInteracting) {
+                    clearTimeout(idleTimeout);
+                    idleTimeout = setTimeout(() => {
+                        if (!isUserInteracting && isFollowing) {
+                            updatePetPosition();
+                        }
+                    }, 1000); // 1秒延迟
+                } else if (isFollowing && !isUserInteracting) {
+                    clearTimeout(idleTimeout);
+                    updatePetPosition();
+                }
+                
+                // 如果正在交互，触发宠物的互动动画
+                if (isUserInteracting) {
+                    triggerContextualAnimation();
+                }
+            });
+            
+            // 鼠标点击事件
+            document.addEventListener('mousedown', (e) => {
+                lastUserActivity = Date.now();
+                isUserInteracting = true;
+                
+                // 点击时触发宠物关注动画
+                const petSprite = document.querySelector('.pet-sprite');
+                if (petSprite && !e.target.closest('.pet-container')) {
+                    triggerAttentionAnimation();
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                // 延迟检查是否还在交互
+                setTimeout(() => {
+                    const elementUnderMouse = document.elementFromPoint(mousePosition.x, mousePosition.y);
+                    isUserInteracting = checkIfInteracting(elementUnderMouse);
+                }, 100);
+            });
+            
+            // 键盘事件（表示用户正在输入）
+            document.addEventListener('keydown', () => {
+                lastUserActivity = Date.now();
+                isUserInteracting = true;
+                triggerTypingAnimation();
+            });
+            
+            document.addEventListener('keyup', () => {
+                setTimeout(() => {
+                    if (!document.activeElement || !checkIfInteracting(document.activeElement)) {
+                        isUserInteracting = false;
+                    }
+                }, 500);
+            });
+            
+            // 焦点事件
+            document.addEventListener('focusin', (e) => {
+                if (checkIfInteracting(e.target)) {
+                    isUserInteracting = true;
+                    lastUserActivity = Date.now();
+                }
+            });
+            
+            document.addEventListener('focusout', () => {
+                setTimeout(() => {
+                    if (!document.activeElement || !checkIfInteracting(document.activeElement)) {
+                        isUserInteracting = false;
+                    }
+                }, 300);
+            });
+            
+            // 触摸设备支持
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    mousePosition.x = e.touches[0].clientX;
+                    mousePosition.y = e.touches[0].clientY;
+                    lastUserActivity = Date.now();
+                    
+                    if (isFollowing && !isUserInteracting) {
+                        updatePetPosition();
+                    }
+                }
+            });
+            
+            // 开始宠物动画循环
+            startPetAnimation();
+        }
+        
+        // 检查元素是否是交互元素
+        function checkIfInteracting(element) {
+            if (!element) return false;
+            
+            return INTERACTIVE_SELECTORS.some(selector => {
+                return element.matches && element.matches(selector) || 
+                       element.closest && element.closest(selector);
+            });
+        }
+        
+        // 触发上下文相关动画
+        function triggerContextualAnimation() {
+            const petSprite = document.querySelector('.pet-sprite');
+            if (petSprite && Math.random() < 0.1) { // 10%概率触发
+                const animations = ['idle-ear-wiggle', 'idle-blink'];
+                const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+                
+                petSprite.classList.add(randomAnimation);
+                setTimeout(() => {
+                    petSprite.classList.remove(randomAnimation);
+                }, 800);
+            }
+        }
+        
+        // 触发注意力动画（用户点击时）
+        function triggerAttentionAnimation() {
+            const petSprite = document.querySelector('.pet-sprite');
+            if (petSprite) {
+                petSprite.classList.add('idle-ear-wiggle');
+                setTimeout(() => {
+                    petSprite.classList.remove('idle-ear-wiggle');
+                }, 600);
+            }
+        }
+        
+        // 触发打字动画（用户输入时）
+        function triggerTypingAnimation() {
+            const petSprite = document.querySelector('.pet-sprite');
+            if (petSprite && Math.random() < 0.3) { // 30%概率触发
+                petSprite.classList.add('idle-tail-wag');
+                setTimeout(() => {
+                    petSprite.classList.remove('idle-tail-wag');
+                }, 1000);
+            }
+        }
+        
+        // 更新宠物位置（智能跟随）
+        function updatePetPosition() {
+            const petContainer = document.getElementById('petContainer');
+            if (!petContainer || !isFollowing || isUserInteracting) return;
+            
+            // 计算目标位置（鼠标位置的偏移）
+            const offsetX = -80; // 增加偏移距离，避免挡住鼠标
+            const offsetY = -80;
+            const targetX = mousePosition.x + offsetX;
+            const targetY = mousePosition.y + offsetY;
+            
+            // 边界检查
+            const maxX = window.innerWidth - 100;
+            const maxY = window.innerHeight - 100;
+            const boundedTargetX = Math.max(20, Math.min(targetX, maxX));
+            const boundedTargetY = Math.max(20, Math.min(targetY, maxY));
+            
+            // 计算距离和移动速度
+            const dx = boundedTargetX - petPosition.x;
+            const dy = boundedTargetY - petPosition.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // 只有距离足够大时才移动（避免抖动）
+            if (distance > 10) { // 增加阈值，减少频繁移动
+                const speed = 0.05; // 降低移动速度，更温和
+                const moveX = dx * speed;
+                const moveY = dy * speed;
+                
+                petPosition.x += moveX;
+                petPosition.y += moveY;
+                
+                // 应用位置
+                petContainer.style.left = `${petPosition.x}px`;
+                petContainer.style.top = `${petPosition.y}px`;
+                
+                // 根据移动方向调整宠物朝向
+                const petSprite = document.querySelector('.pet-sprite');
+                if (petSprite && Math.abs(dx) > 5) {
+                    if (dx > 0) {
+                        petSprite.style.transform = 'scaleX(1)'; // 向右
+                    } else {
+                        petSprite.style.transform = 'scaleX(-1)'; // 向左
+                    }
+                    
+                    // 移动时添加活跃状态
+                    petSprite.classList.add('moving');
+                    clearTimeout(petSprite.moveTimeout);
+                    petSprite.moveTimeout = setTimeout(() => {
+                        petSprite.classList.remove('moving');
+                        petSprite.style.transform = 'scaleX(1)'; // 恢复默认朝向
+                    }, 1000);
+                }
+            }
+        }
+        
+        // 让宠物回到固定位置
+        function movePetToFixedPosition() {
+            const petContainer = document.getElementById('petContainer');
+            if (!petContainer) return;
+            
+            // 固定位置：右下角
+            const fixedX = window.innerWidth - 120;
+            const fixedY = window.innerHeight - 120;
+            
+            // 平滑移动到固定位置
+            const duration = 800; // 800ms 动画
+            const startTime = Date.now();
+            const startX = petPosition.x;
+            const startY = petPosition.y;
+            
+            function animateToFixed() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // 缓动函数
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                
+                petPosition.x = startX + (fixedX - startX) * easeOut;
+                petPosition.y = startY + (fixedY - startY) * easeOut;
+                
+                petContainer.style.left = `${petPosition.x}px`;
+                petContainer.style.top = `${petPosition.y}px`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateToFixed);
+                }
+            }
+            
+            requestAnimationFrame(animateToFixed);
+        }
+        
+        // 宠物动画循环（呼吸、眨眼等）
+        function startPetAnimation() {
+            let animationState = 0;
+            
+            function animateLoop() {
+                const petSprite = document.querySelector('.pet-sprite');
+                if (petSprite && !document.hidden) {
+                    animationState++;
+                    
+                    // 每2秒执行一次随机动画
+                    if (animationState % 120 === 0) { // 60fps * 2秒 = 120帧
+                        triggerRandomAnimation();
+                    }
+                }
+                
+                petAnimationFrame = requestAnimationFrame(animateLoop);
+            }
+            
+            animateLoop();
+        }
+        
+        // 触发随机动画
+        function triggerRandomAnimation() {
+            const petSprite = document.querySelector('.pet-sprite');
+            if (!petSprite) return;
+            
+            const animations = ['idle-blink', 'idle-ear-wiggle', 'idle-tail-wag'];
+            const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+            
+            petSprite.classList.add(randomAnimation);
+            setTimeout(() => {
+                petSprite.classList.remove(randomAnimation);
+            }, 1000);
+        }
+        
+        // 显示宠物右键菜单
+        function showPetContextMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const contextMenu = document.getElementById('petContextMenu');
+            const followText = document.getElementById('followText');
+            
+            // 更新跟随状态文本
+            if (followText) {
+                followText.textContent = isFollowing ? '🚫 停止智能跟随' : '👆 开启智能跟随';
+            }
+            
+            if (contextMenu) {
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${event.pageX}px`;
+                contextMenu.style.top = `${event.pageY}px`;
+                
+                // 确保菜单在屏幕内
+                const rect = contextMenu.getBoundingClientRect();
+                if (rect.right > window.innerWidth) {
+                    contextMenu.style.left = `${event.pageX - rect.width}px`;
+                }
+                if (rect.bottom > window.innerHeight) {
+                    contextMenu.style.top = `${event.pageY - rect.height}px`;
+                }
+            }
+        }
+        
+        // 隐藏宠物右键菜单
+        function hidePetContextMenu() {
+            const contextMenu = document.getElementById('petContextMenu');
+            if (contextMenu) {
+                contextMenu.style.display = 'none';
+            }
+        }
+        
+        // 智能跟随模式切换
+        function togglePetFollowing() {
+            isFollowing = !isFollowing;
+            
+            const petContainer = document.getElementById('petContainer');
+            const followText = document.getElementById('followText');
+            
+            if (petContainer) {
+                if (isFollowing) {
+                    petContainer.classList.remove('pet-static');
+                    if (followText) followText.textContent = '🚫 停止跟随';
+                    showNotification('🐱 智能跟随已开启 - 空闲时宠物会跟随鼠标', true);
+                } else {
+                    petContainer.classList.add('pet-static');
+                    if (followText) followText.textContent = '👆 智能跟随';
+                    showNotification('🐱 智能跟随已关闭 - 宠物将固定在右下角', true);
+                    
+                    // 移动到固定位置
+                    movePetToFixedPosition();
+                }
+            }
+            
+            // 保存跟随状态
+            localStorage.setItem('petFollowing', isFollowing);
+            hidePetContextMenu();
+        }
+        
+        // 宠物瞬移到鼠标位置
+        function petTeleport() {
+            if (mousePosition.x === 0 && mousePosition.y === 0) {
+                // 如果没有鼠标位置，瞬移到屏幕中央
+                mousePosition.x = window.innerWidth / 2;
+                mousePosition.y = window.innerHeight / 2;
+            }
+            
+            petPosition.x = mousePosition.x - 50;
+            petPosition.y = mousePosition.y - 50;
+            
+            const petContainer = document.getElementById('petContainer');
+            if (petContainer) {
+                petContainer.style.left = `${petPosition.x}px`;
+                petContainer.style.top = `${petPosition.y}px`;
+                
+                // 瞬移特效
+                petContainer.style.animation = 'petTeleport 0.3s ease-out';
+                setTimeout(() => {
+                    petContainer.style.animation = '';
+                }, 300);
+            }
+            
+            petSounds.interaction();
+            showNotification('嗖！宠物瞬移过来了！', true);
+            hidePetContextMenu();
+        }
+        
+        // 宠物交互（更新版本）
+        function petInteraction() {
+            petSounds.interaction();
+            
+            const petSprite = document.getElementById('petSprite');
+            if (petSprite) {
+                petSprite.classList.add('bouncing');
+                setTimeout(() => petSprite.classList.remove('bouncing'), 600);
+            }
+            
+            const interactions = [
+                '你摸了摸小猫，它很开心！',
+                '小猫对你喵了一声~',
+                '小猫蹭了蹭你的手',
+                '你给小猫挠了挠下巴',
+                '小猫在你手心里打呼噜'
+            ];
+            
+            const randomInteraction = interactions[Math.floor(Math.random() * interactions.length)];
+            showNotification(randomInteraction, true);
+            
+            // 小概率获得经验值
+            if (Math.random() < 0.3) {
+                petGainXP(1, '互动');
+            }
+        }
+        
+        // 显示宠物详细状态（更新版本）
+        function petStats() {
+            const stats = `🐱 ${petData.name} 的详细状态
+            
+等级：${petData.level}
+经验值：${petData.xp} / ${petData.maxXP}
+总完成任务：${petData.totalTasksCompleted}
+创建日期：${new Date(petData.createdDate).toLocaleDateString()}
+进化阶段：${petData.evolution}
+
+${getAchievementText()}
+
+💡 右键宠物可以控制跟随模式`;
+            
+            showNotification(stats, true);
+            hidePetContextMenu();
+        }
+        
+        // 重置宠物（调试用）
+        function resetPet() {
+            if (confirm('确定要重置宠物吗？这将清除所有进度！')) {
+                localStorage.removeItem('petData');
+                localStorage.removeItem('petCollapsed');
+                location.reload();
+            }
+        }
         
         function toggleTheme() {
             const currentTheme = document.body.getAttribute('data-theme');
@@ -5901,6 +7588,44 @@
             
             // 初始化主题
             initializeTheme();
+            
+            // 初始化宠物系统
+            initPetSystem();
+            
+            // 初始化鼠标跟踪（动态宠物）
+            setTimeout(() => {
+                initMouseTracking();
+                
+                // 加载宠物跟随状态，默认关闭以避免干扰
+                const savedFollowing = localStorage.getItem('petFollowing');
+                if (savedFollowing !== null) {
+                    isFollowing = savedFollowing === 'true';
+                } else {
+                    isFollowing = false; // 默认关闭智能跟随
+                }
+                
+                // 如果跟随关闭，移动到固定位置
+                if (!isFollowing) {
+                    movePetToFixedPosition();
+                }
+                
+                // 添加全局点击事件以隐藏右键菜单
+                document.addEventListener('click', hidePetContextMenu);
+                
+                console.log('✅ 智能宠物系统已启动');
+                console.log(`   - 智能跟随模式: ${isFollowing ? '开启' : '关闭'}`);
+                console.log('   - 右键宠物可切换跟随模式');
+                console.log('   - 编辑时宠物会做出互动反应');
+            }, 500);
+            
+            // 检查宠物收起状态
+            const petCollapsed = localStorage.getItem('petCollapsed');
+            if (petCollapsed === 'true') {
+                const petContainer = document.getElementById('petContainer');
+                if (petContainer) {
+                    petContainer.classList.add('pet-collapsed');
+                }
+            }
             
             // 监听网络状态
             window.addEventListener('online', () => {
