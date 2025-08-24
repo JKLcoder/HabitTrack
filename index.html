@@ -365,6 +365,13 @@
                     description = '保存数据'
                 } = options;
                 
+                // 清理之前的失败状态，给新的同步一个干净的开始
+                if (this.syncState.status === SYNC_STATUS.ERROR || this.syncState.status === SYNC_STATUS.TIMEOUT) {
+                    console.log('[增强同步] 检测到之前的失败状态，重置为空闲状态');
+                    this.syncState.status = SYNC_STATUS.IDLE;
+                    this.syncState.message = '';
+                }
+                
                 if (this.currentSyncPromise) {
                     console.log('[增强同步] 等待当前同步操作完成...');
                     try {
@@ -4488,6 +4495,12 @@
         // 手动同步处理函数
         async function handleManualSync() {
             const syncButton = document.getElementById('manualSyncButton');
+            
+            // 重置同步状态，清理之前的失败状态
+            if (window.enhancedSync) {
+                window.enhancedSync.resetSyncState();
+                console.log('🔄 手动同步前已重置状态');
+            }
             
             // 检查用户是否已登录
             if (!currentUser) {
