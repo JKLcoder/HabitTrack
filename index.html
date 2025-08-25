@@ -3587,6 +3587,7 @@
         let currentUser = null;
         let isOnline = navigator.onLine;
         let isAuthMode = false; // 是否为注册模式
+        let isHandlingAuth = false; // 防止重复处理认证状态变化
         
         // 离线数据缓存
         let offlineSchedules = [];
@@ -3664,6 +3665,12 @@
         }
         
         async function handleAuthSuccess(user) {
+            if (isHandlingAuth) {
+                console.log('认证处理中，跳过重复调用');
+                return;
+            }
+            
+            isHandlingAuth = true;
             console.log('认证成功:', user.email);
             currentUser = user;
             
@@ -3684,6 +3691,8 @@
             setTimeout(() => {
                 console.log('用户认证完成，执行任务流转检查');
                 processUnfinishedTasks();
+                // 重置标志位
+                isHandlingAuth = false;
             }, 500);
             
             // 显示成功消息
@@ -3693,6 +3702,7 @@
         function handleAuthLogout() {
             console.log('用户登出');
             currentUser = null;
+            isHandlingAuth = false; // 重置认证处理标志
             
             // 清空本地数据
             schedules = [];
