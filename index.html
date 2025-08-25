@@ -3782,6 +3782,13 @@
                         // 注册成功后保留邮箱，清空密码
                         emailInput.value = originalEmail;
                         passwordInput.value = '';
+                    } else if (result.data.user && result.data.session) {
+                        // 注册成功并直接登录
+                        console.log('注册成功并直接登录:', result.data.user);
+                        emailInput.value = '';
+                        passwordInput.value = '';
+                        // 主动调用handleAuthSuccess以确保登录窗口被隐藏
+                        await handleAuthSuccess(result.data.user);
                     }
                 } else {
                     // 登录
@@ -3797,6 +3804,9 @@
                     // 登录成功，清空输入框
                     emailInput.value = '';
                     passwordInput.value = '';
+                    
+                    // 主动调用handleAuthSuccess以确保登录窗口被隐藏
+                    await handleAuthSuccess(result.data.user);
                 }
                 
             } catch (error) {
