@@ -686,6 +686,310 @@
             margin: 0 auto;
         }
 
+        /* ==================== 应用布局样式 ==================== */
+        .app-layout {
+            display: flex;
+            gap: 20px;
+            min-height: calc(100vh - 40px);
+        }
+
+        /* 左侧导航栏 */
+        .nav-sidebar {
+            position: fixed;
+            left: 20px;
+            top: 20px;
+            width: 60px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .nav-btn.active:hover {
+            background: #5b7cfa;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(67, 97, 238, 0.5);
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            min-width: 0;
+            margin-left: 100px; /* 为固定导航栏留出空间 */
+        }
+
+        /* Tab内容容器 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==================== 目标管理样式 ==================== */
+        /* 顶部页面标题和操作区 */
+        .goal-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+            border-radius: var(--border-radius);
+            margin-bottom: 16px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(67, 97, 238, 0.08);
+        }
+
+        .goal-page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .goal-page-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 主内容区域 */
+        .goal-main-content {
+            height: calc(100vh - 200px);
+        }
+
+        /* 左侧目标列表区域 */
+        .goal-section {
+            background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(67, 97, 238, 0.08);
+            overflow-y: auto;
+        }
+
+        .goal-list {
+            padding: 20px;
+        }
+
+        /* 目标项 */
+        .goal-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .goal-item-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 8px;
+        }
+
+        .goal-expand-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 20px;
+            text-align: left;
+        }
+
+        .goal-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .goal-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-date {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .goal-action-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: #f9fafb;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .goal-action-btn:hover {
+            background: #e5e7eb;
+            color: var(--text-primary);
+        }
+
+        .goal-action-btn.goal-import {
+            background: #f0f9ff;
+            color: #0369a1;
+            border-color: #0ea5e9;
+        }
+
+        .goal-action-btn.goal-import:hover {
+            background: #e0f2fe;
+            border-color: #0369a1;
+        }
+
+        .goal-action-btn.goal-tag {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #3b82f6;
+        }
+
+        .goal-action-btn.goal-status {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #22c55e;
+        }
+
+        .goal-action-btn.goal-delete {
+            color: #dc2626;
+        }
+
+        .goal-action-btn.goal-delete:hover {
+            background: #fecaca;
+            border-color: #dc2626;
+        }
+
+        /* 进度条 */
+        .goal-progress {
+            padding: 0 16px 8px 44px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* 子任务区域 */
+        .goal-subtasks {
+            padding: 0 16px 16px 44px;
+        }
+
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .subtask-item:last-child {
+            border-bottom: none;
+        }
+
+        .subtask-item.completed .subtask-text {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .subtask-checkbox {
+            width: 16px;
+            height: 16px;
+        }
+
+        .subtask-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .subtask-delete {
+            padding: 4px 8px;
+            font-size: 12px;
+            background: none;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            color: #dc2626;
+            cursor: pointer;
+        }
+
+        .subtask-delete:hover {
+            background: #fecaca;
+            border-color: #dc2626;
+        }
+
+        .subtask-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+
+        /* 空目标列表提示 */
+        .empty-goals {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 16px;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px dashed #e5e7eb;
+            margin: 20px 0;
+        }
+
         /* 主要布局容器 */
         .main-layout {
             display: grid;
@@ -1125,6 +1429,18 @@
             border-radius: 4px;
             font-size: 0.85rem;
             transition: all 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .template-goal-select {
+            min-width: 150px;
+            padding: 6px 8px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.2s ease;
         }
 
         .template-task-input:focus {
@@ -1170,6 +1486,16 @@
         body[data-theme="dark"] .template-task-input:focus {
             border-color: var(--primary-400);
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        body[data-theme="dark"] .template-goal-select {
+            background: var(--gray-300);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        body[data-theme="dark"] .template-goal-select:focus {
+            border-color: var(--primary-400);
         }
 
         .template-list {
@@ -3024,6 +3350,157 @@
             color: #fca5a5;
         }
 
+        /* ==================== 主导航Tab暗色主题样式 ==================== */
+        body[data-theme="dark"] .main-tabs {
+            background: linear-gradient(145deg, var(--gray-100) 0%, #363636 100%);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-theme="dark"] .main-tab {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body[data-theme="dark"] .main-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary-400);
+        }
+
+        body[data-theme="dark"] .main-tab.active {
+            background: linear-gradient(135deg, var(--primary-500) 0%, #818cf8 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        }
+
+        body[data-theme="dark"] .main-tab.active:hover {
+            background: linear-gradient(135deg, #818cf8 0%, var(--primary-500) 100%);
+            color: white;
+        }
+
+        /* ==================== 主导航按钮暗色主题样式 ==================== */
+        body[data-theme="dark"] .nav-btn {
+            background: rgba(45, 45, 45, 0.9);
+            backdrop-filter: blur(10px);
+            color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        body[data-theme="dark"] .nav-btn:hover {
+            background: rgba(60, 60, 60, 0.95);
+            color: var(--primary-400);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        body[data-theme="dark"] .nav-btn.active {
+            background: var(--primary-500);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        body[data-theme="dark"] .nav-btn.active:hover {
+            background: #818cf8;
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+        }
+
+        /* ==================== 目标管理暗色主题样式 ==================== */
+        body[data-theme="dark"] .goal-page-header,
+        body[data-theme="dark"] .goal-section {
+            background: linear-gradient(145deg, var(--gray-100) 0%, #363636 100%);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body[data-theme="dark"] .goal-page-title {
+            color: white;
+        }
+
+        body[data-theme="dark"] .goal-item {
+            background: var(--gray-200);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body[data-theme="dark"] .goal-name,
+        body[data-theme="dark"] .subtask-text {
+            color: white;
+        }
+
+        body[data-theme="dark"] .goal-action-btn {
+            background: var(--gray-300);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        body[data-theme="dark"] .goal-action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-import {
+            background: rgba(14, 165, 233, 0.3);
+            color: #7dd3fc;
+            border-color: #0ea5e9;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-import:hover {
+            background: rgba(14, 165, 233, 0.4);
+            border-color: #0369a1;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-tag {
+            background: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            border-color: #3b82f6;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-status {
+            background: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+            border-color: #22c55e;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-delete {
+            color: #fca5a5;
+        }
+
+        body[data-theme="dark"] .goal-action-btn.goal-delete:hover {
+            background: rgba(220, 38, 38, 0.3);
+            border-color: #dc2626;
+        }
+
+        body[data-theme="dark"] .progress-bar-container {
+            background: var(--gray-300);
+        }
+
+        body[data-theme="dark"] .subtask-item {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body[data-theme="dark"] .subtask-item.completed .subtask-text {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body[data-theme="dark"] .subtask-delete {
+            background: var(--gray-300);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fca5a5;
+        }
+
+        body[data-theme="dark"] .subtask-delete:hover {
+            background: rgba(220, 38, 38, 0.3);
+            border-color: #dc2626;
+        }
+
+        body[data-theme="dark"] .subtask-hint {
+            background: var(--gray-300);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body[data-theme="dark"] .empty-goals {
+            background: var(--gray-200);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
         
         /* ==================== ReportView 同步日志面板样式 ==================== */
         
@@ -3420,7 +3897,33 @@
     
     
     <div class="container">
-        <div class="main-layout">
+        <!-- 应用主体布局 -->
+        <div class="app-layout">
+            <!-- 左侧导航按钮 -->
+            <div class="nav-sidebar">
+                <button class="nav-btn active" id="scheduleTab" data-tab="schedule">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    日程管理
+                </button>
+                <button class="nav-btn" id="goalTab" data-tab="goal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 12l2 2 4-4"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                    目标管理
+                </button>
+            </div>
+
+            <!-- 右侧内容区域 -->
+            <div class="content-area">
+                <!-- 日程管理内容 -->
+                <div class="tab-content active" id="scheduleContent">
+            <div class="main-layout">
             <!-- 左侧任务面板 -->
             <div class="schedule-panel">
                 <div class="schedule-header">
@@ -3524,6 +4027,30 @@
                 </div>
             </div>
         </div>
+        </div> <!-- 关闭日程管理内容 -->
+
+        <!-- 目标管理内容 -->
+        <div class="tab-content" id="goalContent">
+            <!-- 顶部标题和操作区 -->
+            <div class="goal-page-header">
+                <h1 class="goal-page-title">目标管理・列表原型</h1>
+                <div class="goal-page-actions">
+                    <button class="btn btn-primary" id="addGoal">+ 新目标</button>
+                </div>
+            </div>
+
+            <!-- 主内容区域 -->
+            <div class="goal-main-content">
+                <!-- 目标列表（全宽显示） -->
+                <div class="goal-section">
+                    <div class="goal-list" id="activeGoalsList">
+                        <!-- 目标列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div> <!-- 关闭内容区域 -->
+        </div> <!-- 关闭应用布局 -->
     </div>
 
     <!-- 设置按钮 -->
@@ -5805,6 +6332,28 @@
             
             console.log(`[子任务] 子任务 ${mainTaskIndex}-${subtaskIndex} 完成状态: ${subtask.completed}`);
             
+            // 双向同步：如果子任务来自目标，更新目标中的子任务状态
+            const mainTask = selectedSchedule.items[mainTaskIndex];
+            if (mainTask.goalId && subtask.goalId && window.goalsList) {
+                const associatedGoal = window.goalsList.find(goal => goal.id == mainTask.goalId);
+                if (associatedGoal && associatedGoal.subtasks) {
+                    const originalSubtask = associatedGoal.subtasks.find(st => st.id == subtask.id);
+                    if (originalSubtask) {
+                        originalSubtask.completed = subtask.completed;
+                        
+                        // 保存目标数据
+                        saveGoalsData();
+                        
+                        console.log(`[双向同步] 已同步子任务 ${subtask.id} 到目标 ${associatedGoal.name}`);
+                        
+                        // 如果在目标管理页面，刷新显示
+                        if (document.getElementById('goalManagement').classList.contains('active')) {
+                            renderGoalsList();
+                        }
+                    }
+                }
+            }
+            
             // 宠物系统：子任务完成获得经验值
             if (subtask.completed) {
                 petGainXP(3, '完成子任务'); // 子任务奖励3经验
@@ -5862,15 +6411,30 @@
             
             // 确认删除
             if (subtask.content && subtask.content.trim() !== '') {
-                if (!confirm(`确定要删除子任务"${subtask.content}"吗？`)) {
+                let confirmMessage = `确定要删除子任务"${subtask.content}"吗？`;
+                
+                // 如果是来自目标的子任务，给出额外提示
+                if (subtask.goalId && mainTask.goalId) {
+                    const associatedGoal = window.goalsList ? window.goalsList.find(goal => goal.id == mainTask.goalId) : null;
+                    if (associatedGoal) {
+                        confirmMessage += `\n\n注意：此子任务来自目标"${associatedGoal.name}"，删除后只会从今日日程中移除，不会影响目标中的原始子任务。`;
+                    }
+                }
+                
+                if (!confirm(confirmMessage)) {
                     return;
                 }
+            }
+            
+            console.log(`[子任务] 删除子任务 ${mainTaskIndex}-${subtaskIndex}: "${subtask.content || '空内容'}"`);
+            if (subtask.goalId) {
+                console.log(`[双向同步] 删除的子任务来自目标 ${subtask.goalId}，仅从日程中移除`);
             }
             
             // 删除子任务
             mainTask.subtasks.splice(subtaskIndex, 1);
             
-            console.log(`[子任务] 删除子任务 ${mainTaskIndex}-${subtaskIndex}，剩余 ${mainTask.subtasks.length} 个子任务`);
+            console.log(`[子任务] 剩余 ${mainTask.subtasks.length} 个子任务`);
             
             // 如果没有子任务了，收起展开状态
             if (mainTask.subtasks.length === 0) {
@@ -6203,6 +6767,22 @@
             const workdayContainer = document.getElementById('workdayTimeList');
             const nonWorkdayContainer = document.getElementById('nonWorkdayTimeList');
             
+            // 确保目标数据已加载
+            if (!window.goalsList) {
+                loadGoalsData();
+            }
+            
+            // 生成目标选择选项
+            function generateGoalOptions() {
+                let options = '<option value="">选择关联目标（可选）</option>';
+                if (window.goalsList && window.goalsList.length > 0) {
+                    window.goalsList.forEach(goal => {
+                        options += `<option value="${goal.id}">${goal.name}</option>`;
+                    });
+                }
+                return options;
+            }
+            
             // 生成时间段HTML
             const timeSlotHTML = [];
             for (let hour = 7; hour <= 23; hour++) {
@@ -6214,6 +6794,11 @@
                                data-time="${timeSlot}" 
                                placeholder="输入默认任务..."
                                onchange="updateTemplateTask('${timeSlot}', this.value)">
+                        <select class="template-goal-select" 
+                                data-time="${timeSlot}"
+                                onchange="updateTemplateGoalAssociation('${timeSlot}', this.value)">
+                            ${generateGoalOptions()}
+                        </select>
                     </div>
                 `);
             }
@@ -6232,9 +6817,29 @@
             
             // 填入已保存的模板数据
             const inputs = container.querySelectorAll('.template-task-input');
+            const selects = container.querySelectorAll('.template-goal-select');
+            
             inputs.forEach(input => {
                 const time = input.getAttribute('data-time');
-                input.value = template[time] || '';
+                const templateData = template[time];
+                if (templateData && typeof templateData === 'object') {
+                    input.value = templateData.task || '';
+                } else if (typeof templateData === 'string') {
+                    // 兼容旧格式
+                    input.value = templateData;
+                } else {
+                    input.value = '';
+                }
+            });
+
+            selects.forEach(select => {
+                const time = select.getAttribute('data-time');
+                const templateData = template[time];
+                if (templateData && typeof templateData === 'object') {
+                    select.value = templateData.goalId || '';
+                } else {
+                    select.value = '';
+                }
             });
         }
         
@@ -6243,15 +6848,65 @@
             
             if (currentTemplateTab === 'workday') {
                 if (task.trim()) {
-                    workdayTemplate[time] = task.trim();
+                    if (!workdayTemplate[time]) {
+                        workdayTemplate[time] = {};
+                    }
+                    workdayTemplate[time].task = task.trim();
                 } else {
-                    delete workdayTemplate[time];
+                    if (workdayTemplate[time]) {
+                        delete workdayTemplate[time].task;
+                        if (Object.keys(workdayTemplate[time]).length === 0) {
+                            delete workdayTemplate[time];
+                        }
+                    }
                 }
             } else {
                 if (task.trim()) {
-                    nonWorkdayTemplate[time] = task.trim();
+                    if (!nonWorkdayTemplate[time]) {
+                        nonWorkdayTemplate[time] = {};
+                    }
+                    nonWorkdayTemplate[time].task = task.trim();
                 } else {
-                    delete nonWorkdayTemplate[time];
+                    if (nonWorkdayTemplate[time]) {
+                        delete nonWorkdayTemplate[time].task;
+                        if (Object.keys(nonWorkdayTemplate[time]).length === 0) {
+                            delete nonWorkdayTemplate[time];
+                        }
+                    }
+                }
+            }
+        }
+
+        function updateTemplateGoalAssociation(time, goalId) {
+            console.log('更新模板目标关联:', currentTemplateTab, time, goalId);
+            
+            if (currentTemplateTab === 'workday') {
+                if (goalId) {
+                    if (!workdayTemplate[time]) {
+                        workdayTemplate[time] = {};
+                    }
+                    workdayTemplate[time].goalId = goalId;
+                } else {
+                    if (workdayTemplate[time]) {
+                        delete workdayTemplate[time].goalId;
+                        if (Object.keys(workdayTemplate[time]).length === 0) {
+                            delete workdayTemplate[time];
+                        }
+                    }
+                }
+            } else {
+                if (goalId) {
+                    if (!nonWorkdayTemplate[time]) {
+                        nonWorkdayTemplate[time] = {};
+                    }
+                    nonWorkdayTemplate[time].goalId = goalId;
+                } else {
+                    if (nonWorkdayTemplate[time]) {
+                        delete nonWorkdayTemplate[time].goalId;
+                        if (Object.keys(nonWorkdayTemplate[time]).length === 0) {
+                            delete nonWorkdayTemplate[time];
+                        }
+                    }
                 }
             }
         }
@@ -6363,18 +7018,49 @@
             
             for (let hour = 7; hour <= 23; hour++) {
                 const timeSlot = `${hour}:00`;
-                const taskContent = template[timeSlot] || '';
+                const templateData = template[timeSlot];
+                
+                let taskContent = '';
+                let goalId = null;
+                let subtasks = [];
+                
+                if (templateData) {
+                    if (typeof templateData === 'object') {
+                        taskContent = templateData.task || '';
+                        goalId = templateData.goalId || null;
+                        
+                        // 如果关联了目标，获取该目标的未完成子任务
+                        if (goalId && window.goalsList) {
+                            const associatedGoal = window.goalsList.find(goal => goal.id == goalId);
+                            if (associatedGoal && associatedGoal.subtasks) {
+                                subtasks = associatedGoal.subtasks
+                                    .filter(subtask => !subtask.completed)
+                                    .map(subtask => ({
+                                        id: subtask.id,
+                                        content: subtask.text, // 使用 content 字段以匹配日程格式
+                                        completed: false,
+                                        goalId: goalId // 记录来源目标ID
+                                    }));
+                            }
+                        }
+                    } else if (typeof templateData === 'string') {
+                        // 兼容旧格式
+                        taskContent = templateData;
+                    }
+                }
                 
                 slots.push({
                     time: timeSlot,
                     task: taskContent,
+                    goalId: goalId,
                     completed: false,
-                    subtasks: [],
+                    subtasks: subtasks,
                     expanded: false
                 });
             }
             
-            console.log(`生成了 ${slots.length} 个时间段，其中 ${slots.filter(s => s.task).length} 个有任务内容`);
+            const tasksWithContent = slots.filter(s => s.task || (s.subtasks && s.subtasks.length > 0));
+            console.log(`生成了 ${slots.length} 个时间段，其中 ${tasksWithContent.length} 个有内容`);
             
             return slots;
         }
@@ -7612,9 +8298,543 @@ ${getAchievementText()}
         console.log('📊 在控制台输入 debugCalendar.stats() 查看同步统计');
         console.log('🔧 可用调试命令:', Object.keys(window.debugCalendar));
 
+        // ==================== 主导航Tab系统 ====================
+        
+        function initMainTabs() {
+            const scheduleTab = document.getElementById('scheduleTab');
+            const goalTab = document.getElementById('goalTab');
+            const scheduleContent = document.getElementById('scheduleContent');
+            const goalContent = document.getElementById('goalContent');
+            
+            // 切换到日程管理
+            scheduleTab.addEventListener('click', () => {
+                switchToTab('schedule');
+            });
+            
+            // 切换到目标管理
+            goalTab.addEventListener('click', () => {
+                switchToTab('goal');
+            });
+            
+            // 默认显示日程管理
+            switchToTab('schedule');
+        }
+        
+        function switchToTab(tabName) {
+            const scheduleTab = document.getElementById('scheduleTab');
+            const goalTab = document.getElementById('goalTab');
+            const scheduleContent = document.getElementById('scheduleContent');
+            const goalContent = document.getElementById('goalContent');
+            
+            // 重置所有tab状态
+            scheduleTab.classList.remove('active');
+            goalTab.classList.remove('active');
+            scheduleContent.classList.remove('active');
+            goalContent.classList.remove('active');
+            
+            if (tabName === 'schedule') {
+                scheduleTab.classList.add('active');
+                scheduleContent.classList.add('active');
+                console.log('切换到日程管理页面');
+            } else if (tabName === 'goal') {
+                goalTab.classList.add('active');
+                goalContent.classList.add('active');
+                console.log('切换到目标管理页面');
+                
+                // 初始化目标管理页面功能
+                initGoalManagement();
+            }
+        }
+
+        // 目标管理功能初始化
+        function initGoalManagement() {
+            // 如果已经初始化过，则跳过
+            if (window.goalManagementInitialized) return;
+            window.goalManagementInitialized = true;
+
+            // 初始化目标数据
+            if (!window.goalsList) {
+                window.goalsList = [];
+            }
+            
+            // 加载保存的目标数据
+            loadGoalsData();
+
+            // 绑定事件处理器
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('goal-expand-btn')) {
+                    toggleGoalExpand(e.target);
+                } else if (e.target.id === 'addGoal') {
+                    addNewGoal();
+                } else if (e.target.classList.contains('goal-import')) {
+                    importSubtasksFromMD(e.target);
+                } else if (e.target.classList.contains('goal-task')) {
+                    addNewSubtask(e.target);
+                } else if (e.target.classList.contains('goal-delete')) {
+                    deleteGoal(e.target);
+                } else if (e.target.classList.contains('subtask-delete')) {
+                    deleteGoalSubtask(e.target);
+                }
+            });
+
+            // 绑定双击编辑事件（使用事件委托）
+            document.addEventListener('dblclick', function(e) {
+                if (e.target.classList.contains('goal-name')) {
+                    const goalItem = e.target.closest('.goal-item');
+                    const goalId = parseInt(goalItem.dataset.goalId);
+                    makeEditable(e.target, 'name', goalId);
+                } else if (e.target.classList.contains('subtask-text')) {
+                    const subtaskItem = e.target.closest('.subtask-item');
+                    const goalItem = e.target.closest('.goal-item');
+                    const goalId = parseInt(goalItem.dataset.goalId);
+                    const subtaskId = parseInt(subtaskItem.dataset.subtaskId);
+                    makeEditable(e.target, 'subtask', goalId, subtaskId);
+                }
+            });
+
+            // 绑定子任务checkbox事件
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('subtask-checkbox')) {
+                    updateSubtaskStatus(e.target);
+                }
+            });
+
+            // 渲染目标列表
+            renderGoalsList();
+            
+            console.log('目标管理功能已初始化');
+        }
+
+        // 保存目标数据到localStorage
+        function saveGoalsData() {
+            try {
+                // 保存备份
+                const currentData = localStorage.getItem('calendarGoals');
+                if (currentData) {
+                    localStorage.setItem('calendarGoalsBackup', currentData);
+                    localStorage.setItem('calendarGoalsBackupTime', new Date().toISOString());
+                }
+                
+                localStorage.setItem('calendarGoals', JSON.stringify(window.goalsList));
+                localStorage.setItem('calendarGoalsUpdateTime', new Date().toISOString());
+                
+                console.log('目标数据已保存到localStorage');
+                
+                // 尝试同步到云端
+                if (typeof enhancedSyncSystem !== 'undefined' && enhancedSyncSystem) {
+                    enhancedSyncSystem.syncToCloud({
+                        type: 'goals',
+                        data: window.goalsList,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            } catch (error) {
+                console.error('保存目标数据失败:', error);
+            }
+        }
+
+        // 从localStorage加载目标数据
+        function loadGoalsData() {
+            try {
+                const savedGoals = localStorage.getItem('calendarGoals');
+                if (savedGoals) {
+                    window.goalsList = JSON.parse(savedGoals);
+                    console.log('目标数据已从localStorage加载');
+                } else {
+                    window.goalsList = [];
+                }
+            } catch (error) {
+                console.error('加载目标数据失败:', error);
+                window.goalsList = [];
+            }
+        }
+
+        // 添加新目标
+        function addNewGoal() {
+            const newGoal = {
+                id: Date.now(),
+                name: '新目标',
+                subtasks: [],
+                expanded: true
+            };
+
+            window.goalsList.push(newGoal);
+            saveGoalsData(); // 保存数据
+            renderGoalsList();
+            
+            // 聚焦到新目标的名称编辑
+            setTimeout(() => {
+                const newGoalElement = document.querySelector(`[data-goal-id="${newGoal.id}"] .goal-name`);
+                if (newGoalElement) {
+                    makeEditable(newGoalElement, 'name', newGoal.id);
+                }
+            }, 100);
+        }
+
+        // 从MD文件导入子任务
+        function importSubtasksFromMD(button) {
+            const goalItem = button.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            const goal = window.goalsList.find(g => g.id === goalId);
+            
+            if (!goal) return;
+
+            // 创建文件输入元素
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.md,.markdown,.txt';
+            fileInput.style.display = 'none';
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const subtasks = parseMarkdownTasks(content);
+                    
+                    if (subtasks.length === 0) {
+                        alert('未找到有序列表格式的任务。请确保任务以有序列表形式存在（如：1. 任务内容）');
+                        return;
+                    }
+
+                    // 批量添加子任务
+                    subtasks.forEach(taskText => {
+                        const newSubtask = {
+                            id: Date.now() + Math.random(), // 确保唯一性
+                            text: taskText,
+                            completed: false
+                        };
+                        goal.subtasks.push(newSubtask);
+                    });
+
+                    goal.expanded = true; // 展开目标以显示新子任务
+                    saveGoalsData(); // 保存数据
+                    renderGoalsList();
+                    
+                    alert(`成功导入 ${subtasks.length} 个子任务`);
+                };
+                
+                reader.onerror = function() {
+                    alert('文件读取失败，请重试');
+                };
+                
+                reader.readAsText(file, 'UTF-8');
+            });
+            
+            // 触发文件选择
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            document.body.removeChild(fileInput);
+        }
+
+        // 解析Markdown文档中的有序列表任务
+        function parseMarkdownTasks(content) {
+            const tasks = [];
+            const lines = content.split('\n');
+            
+            for (let line of lines) {
+                line = line.trim();
+                
+                // 匹配有序列表格式：1. 任务内容 或者 1) 任务内容
+                const orderedListMatch = line.match(/^\d+[.)]\s+(.+)$/);
+                if (orderedListMatch) {
+                    let taskText = orderedListMatch[1].trim();
+                    
+                    // 移除Markdown格式标记
+                    taskText = taskText
+                        .replace(/^\*\*(.+)\*\*$/, '$1') // 移除粗体
+                        .replace(/^\*(.+)\*$/, '$1')     // 移除斜体
+                        .replace(/^`(.+)`$/, '$1')       // 移除行内代码
+                        .replace(/^\[(.+)\]\(.+\)$/, '$1') // 移除链接，保留文本
+                        .replace(/^~~(.+)~~$/, '$1');    // 移除删除线
+                    
+                    if (taskText.length > 0) {
+                        tasks.push(taskText);
+                    }
+                }
+                
+                // 也支持无序列表格式：- 任务内容 或 * 任务内容
+                const unorderedListMatch = line.match(/^[-*+]\s+(.+)$/);
+                if (unorderedListMatch) {
+                    let taskText = unorderedListMatch[1].trim();
+                    
+                    // 移除Markdown格式标记
+                    taskText = taskText
+                        .replace(/^\*\*(.+)\*\*$/, '$1')
+                        .replace(/^\*(.+)\*$/, '$1')
+                        .replace(/^`(.+)`$/, '$1')
+                        .replace(/^\[(.+)\]\(.+\)$/, '$1')
+                        .replace(/^~~(.+)~~$/, '$1');
+                    
+                    if (taskText.length > 0) {
+                        tasks.push(taskText);
+                    }
+                }
+            }
+            
+            return tasks;
+        }
+        
+        // 添加新子任务
+        function addNewSubtask(button) {
+            const goalItem = button.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            const goal = window.goalsList.find(g => g.id === goalId);
+            
+            if (goal) {
+                const newSubtask = {
+                    id: Date.now(),
+                    text: '新子任务',
+                    completed: false
+                };
+                
+                goal.subtasks.push(newSubtask);
+                goal.expanded = true; // 展开目标以显示新子任务
+                saveGoalsData(); // 保存数据
+                renderGoalsList();
+                
+                // 聚焦到新子任务的文本编辑
+                setTimeout(() => {
+                    const newSubtaskElement = document.querySelector(`[data-subtask-id="${newSubtask.id}"] .subtask-text`);
+                    if (newSubtaskElement) {
+                        makeEditable(newSubtaskElement, 'subtask', goalId, newSubtask.id);
+                    }
+                }, 100);
+            }
+        }
+
+        // 删除目标
+        function deleteGoal(button) {
+            const goalItem = button.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            
+            if (confirm('确定要删除这个目标吗？')) {
+                window.goalsList = window.goalsList.filter(g => g.id !== goalId);
+                saveGoalsData(); // 保存数据
+                renderGoalsList();
+            }
+        }
+
+        // 删除目标子任务
+        function deleteGoalSubtask(button) {
+            const subtaskItem = button.closest('.subtask-item');
+            const goalItem = button.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            const subtaskId = parseInt(subtaskItem.dataset.subtaskId);
+            
+            const goal = window.goalsList.find(g => g.id === goalId);
+            if (goal) {
+                goal.subtasks = goal.subtasks.filter(s => s.id !== subtaskId);
+                saveGoalsData(); // 保存数据
+                renderGoalsList();
+            }
+        }
+
+        // 更新子任务完成状态
+        function updateSubtaskStatus(checkbox) {
+            const subtaskItem = checkbox.closest('.subtask-item');
+            const goalItem = checkbox.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            const subtaskId = parseInt(subtaskItem.dataset.subtaskId);
+            
+            const goal = window.goalsList.find(g => g.id === goalId);
+            if (goal) {
+                const subtask = goal.subtasks.find(s => s.id === subtaskId);
+                if (subtask) {
+                    subtask.completed = checkbox.checked;
+                    
+                    // 双向同步：更新当前日程中相同的子任务状态
+                    const today = new Date();
+                    const todayString = formatDate(today);
+                    const todaySchedule = schedules.find(schedule => schedule.dayId === todayString);
+                    
+                    if (todaySchedule && todaySchedule.items) {
+                        let syncedCount = 0;
+                        todaySchedule.items.forEach(item => {
+                            if (item.goalId == goalId && item.subtasks) {
+                                item.subtasks.forEach(scheduleSubtask => {
+                                    if (scheduleSubtask.id == subtaskId || scheduleSubtask.goalId == goalId) {
+                                        if (scheduleSubtask.id == subtaskId) {
+                                            scheduleSubtask.completed = subtask.completed;
+                                            syncedCount++;
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (syncedCount > 0) {
+                            console.log(`[双向同步] 已从目标 ${goal.name} 同步 ${syncedCount} 个子任务到今日日程`);
+                            
+                            // 如果当前显示的是今天的日程，刷新显示
+                            const isViewingToday = selectedDate.getFullYear() === today.getFullYear() &&
+                                                   selectedDate.getMonth() === today.getMonth() &&
+                                                   selectedDate.getDate() === today.getDate();
+                            
+                            if (isViewingToday && document.getElementById('scheduleManagement').classList.contains('active')) {
+                                renderScheduleForDate();
+                            }
+                            
+                            // 保存日程数据
+                            saveToSupabaseDebounced(todayString);
+                        }
+                    }
+                    
+                    saveGoalsData(); // 保存数据
+                    renderGoalsList();
+                }
+            }
+        }
+
+        // 渲染目标列表
+        function renderGoalsList() {
+            const goalList = document.getElementById('activeGoalsList');
+            if (!goalList) return;
+
+            if (window.goalsList.length === 0) {
+                goalList.innerHTML = '<div class="empty-goals">暂无目标，点击上方 + 新目标 按钮添加</div>';
+                return;
+            }
+
+            goalList.innerHTML = window.goalsList.map(goal => {
+                const completedSubtasks = goal.subtasks.filter(s => s.completed).length;
+                const totalSubtasks = goal.subtasks.length;
+                const progress = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+                
+                return `
+                    <div class="goal-item ${goal.expanded ? 'expanded' : 'collapsed'}" data-goal-id="${goal.id}">
+                        <div class="goal-item-header">
+                            <button class="goal-expand-btn">${goal.expanded ? '▼' : '▶'}</button>
+                            <span class="goal-name" contenteditable="false">${goal.name}</span>
+                            <div class="goal-meta">
+                                <button class="goal-action-btn goal-import">📄 导入</button>
+                                <button class="goal-action-btn goal-task">子任务</button>
+                                <button class="goal-action-btn goal-delete">删除</button>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-subtasks" style="display: ${goal.expanded ? 'block' : 'none'};">
+                            ${goal.subtasks.map(subtask => `
+                                <div class="subtask-item ${subtask.completed ? 'completed' : ''}" data-subtask-id="${subtask.id}">
+                                    <input type="checkbox" ${subtask.completed ? 'checked' : ''} class="subtask-checkbox">
+                                    <span class="subtask-text" contenteditable="false">${subtask.text}</span>
+                                    <button class="subtask-delete">删除</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 使元素可编辑
+        function makeEditable(element, type, goalId, subtaskId = null) {
+            element.contentEditable = true;
+            element.focus();
+            
+            // 选中全部文本
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            const originalText = element.textContent;
+
+            const finishEditing = () => {
+                element.contentEditable = false;
+                const newText = element.textContent.trim();
+                
+                if (newText && newText !== originalText) {
+                    if (type === 'name') {
+                        const goal = window.goalsList.find(g => g.id === goalId);
+                        if (goal) {
+                            goal.name = newText;
+                            saveGoalsData(); // 保存数据
+                        }
+                    } else if (type === 'subtask') {
+                        const goal = window.goalsList.find(g => g.id === goalId);
+                        if (goal) {
+                            const subtask = goal.subtasks.find(s => s.id === subtaskId);
+                            if (subtask) {
+                                subtask.text = newText;
+                                saveGoalsData(); // 保存数据
+                            }
+                        }
+                    }
+                } else if (!newText) {
+                    element.textContent = originalText;
+                }
+            };
+
+            const addNewSubtaskAndEdit = () => {
+                finishEditing();
+                // 延迟一点时间确保当前编辑完成
+                setTimeout(() => {
+                    // 找到当前目标并添加新子任务
+                    const goal = window.goalsList.find(g => g.id === goalId);
+                    if (goal) {
+                        const newSubtask = {
+                            id: Date.now(),
+                            text: '新子任务',
+                            completed: false
+                        };
+                        
+                        goal.subtasks.push(newSubtask);
+                        goal.expanded = true;
+                        saveGoalsData(); // 保存数据
+                        renderGoalsList();
+                        
+                        // 聚焦到新子任务的文本编辑
+                        setTimeout(() => {
+                            const newSubtaskElement = document.querySelector(`[data-subtask-id="${newSubtask.id}"] .subtask-text`);
+                            if (newSubtaskElement) {
+                                makeEditable(newSubtaskElement, 'subtask', goalId, newSubtask.id);
+                            }
+                        }, 100);
+                    }
+                }, 50);
+            };
+
+            element.addEventListener('blur', finishEditing, { once: true });
+            element.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    finishEditing();
+                } else if (e.key === 'Tab' && type === 'subtask') {
+                    e.preventDefault();
+                    addNewSubtaskAndEdit();
+                }
+            });
+        }
+
+        // 切换目标展开收起
+        function toggleGoalExpand(button) {
+            const goalItem = button.closest('.goal-item');
+            const goalId = parseInt(goalItem.dataset.goalId);
+            const goal = window.goalsList.find(g => g.id === goalId);
+            
+            if (goal) {
+                goal.expanded = !goal.expanded;
+                saveGoalsData(); // 保存数据
+                renderGoalsList();
+            }
+        }
+
         // ==================== 初始化 ====================
         
         document.addEventListener('DOMContentLoaded', async function() {
+            // 首先初始化主导航Tab系统
+            initMainTabs();
+            
             // 首先初始化Supabase
             console.log('开始初始化Supabase...');
             await initializeSupabase();
