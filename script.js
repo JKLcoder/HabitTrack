@@ -336,6 +336,28 @@ function saveHabit(e) {
     }
     
     saveHabitsToStorage();
+    
+    // 添加到 outbox 同步队列
+    if (window.outboxSystem) {
+        try {
+            if (editingHabitId) {
+                // 编辑现有习惯
+                const editedHabit = habits.find(h => h.id === editingHabitId);
+                if (editedHabit) {
+                    window.outboxSystem.addMutation('update', 'habit', editingHabitId, editedHabit);
+                }
+            } else {
+                // 添加新习惯
+                const newHabit = habits[habits.length - 1]; // 最新添加的习惯
+                if (newHabit) {
+                    window.outboxSystem.addMutation('create', 'habit', newHabit.id, newHabit);
+                }
+            }
+        } catch (error) {
+            console.error('[Outbox] 添加习惯变更失败:', error);
+        }
+    }
+    
     renderHabits();
     updateWeeklySummary();
     
@@ -355,8 +377,21 @@ function saveHabit(e) {
 function deleteHabit(habitId) {
     console.log(`删除习惯，习惯ID: ${habitId}`);
     if (confirm('确定要删除这个习惯吗？所有相关的打卡记录都将被删除。')) {
+        // 获取要删除的习惯数据（用于同步）
+        const habitToDelete = habits.find(h => h.id === habitId);
+        
         habits = habits.filter(h => h.id !== habitId);
         saveHabitsToStorage();
+        
+        // 添加删除操作到 outbox 同步队列
+        if (window.outboxSystem && habitToDelete) {
+            try {
+                window.outboxSystem.addMutation('delete', 'habit', habitId, habitToDelete);
+            } catch (error) {
+                console.error('[Outbox] 添加删除习惯变更失败:', error);
+            }
+        }
+        
         renderHabits();
         updateWeeklySummary();
     }
@@ -410,6 +445,15 @@ function toggleCheckmark(habitId, dateStr) {
     
     // 确保保存到localStorage
     saveHabitsToStorage();
+    
+    // 添加打卡变更到 outbox 同步队列
+    if (window.outboxSystem) {
+        try {
+            window.outboxSystem.addMutation('update', 'habit', habitId, habit);
+        } catch (error) {
+            console.error('[Outbox] 添加打卡变更失败:', error);
+        }
+    }
     
     // 重新渲染UI
     renderHabits();
@@ -819,6 +863,18 @@ function archiveHabit(habit, streakInfo) {
     saveHabitsToStorage();
     saveArchivedHabitsToStorage();
     
+    // 添加归档变更到 outbox 同步队列
+    if (window.outboxSystem) {
+        try {
+            // 删除原习惯
+            window.outboxSystem.addMutation('delete', 'habit', habit.id, habit);
+            // 创建归档习惯
+            window.outboxSystem.addMutation('create', 'archived_habit', archivedHabit.id, archivedHabit);
+        } catch (error) {
+            console.error('[Outbox] 添加归档变更失败:', error);
+        }
+    }
+    
     // 显示祝贺消息
     showArchiveNotification(archivedHabit);
     
@@ -1035,6 +1091,18 @@ function restoreHabit(habitId) {
     // 保存到localStorage
     saveHabitsToStorage();
     saveArchivedHabitsToStorage();
+    
+    // 添加恢复习惯变更到 outbox 同步队列
+    if (window.outboxSystem) {
+        try {
+            // 删除归档习惯
+            window.outboxSystem.addMutation('delete', 'archived_habit', habitId, habit);
+            // 创建新的活跃习惯
+            window.outboxSystem.addMutation('create', 'habit', restoredHabit.id, restoredHabit);
+        } catch (error) {
+            console.error('[Outbox] 添加恢复习惯变更失败:', error);
+        }
+    }
     
     // 更新UI
     renderHabits();

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk:*)",
+      "Bash(grep:*)",
+      "Bash(dir)",
+      "Bash(python:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}

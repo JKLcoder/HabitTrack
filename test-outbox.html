@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitTrack Outbox 测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1, h2 {
+            color: #1d1d1f;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #005bb5;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .log {
+            background: #1d1d1f;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .status.info { background: #cce6ff; color: #004085; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007AFF;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin: 5px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 HabitTrack Outbox 同步系统测试</h1>
+        
+        <div id="system-status" class="status info">
+            <strong>系统状态:</strong> 初始化中...
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div id="total-mutations" class="stat-value">-</div>
+                <div class="stat-label">总变更数</div>
+            </div>
+            <div class="stat-card">
+                <div id="pending-mutations" class="stat-value">-</div>
+                <div class="stat-label">待同步</div>
+            </div>
+            <div class="stat-card">
+                <div id="failed-mutations" class="stat-value">-</div>
+                <div class="stat-label">失败</div>
+            </div>
+            <div class="stat-card">
+                <div id="delivered-mutations" class="stat-value">-</div>
+                <div class="stat-label">已交付</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>📝 习惯操作测试</h2>
+        
+        <div class="test-section">
+            <h3>创建测试习惯</h3>
+            <input type="text" id="habit-name" placeholder="习惯名称" value="测试习惯">
+            <input type="text" id="habit-desc" placeholder="习惯描述" value="这是一个测试习惯">
+            <button onclick="createTestHabit()">创建习惯</button>
+        </div>
+
+        <div class="test-section">
+            <h3>批量操作测试</h3>
+            <button onclick="createMultipleHabits(5)">创建 5 个习惯</button>
+            <button onclick="toggleRandomCheckmarks(10)">随机打卡 10 次</button>
+            <button onclick="deleteRandomHabits(2)">删除 2 个习惯</button>
+        </div>
+
+        <div class="test-section">
+            <h3>网络测试</h3>
+            <button onclick="simulateOffline()">模拟离线 (5秒)</button>
+            <button onclick="forceSync()">强制同步</button>
+            <button onclick="clearOutbox()">清空 Outbox</button>
+        </div>
+
+        <div class="test-section">
+            <h3>同步控制</h3>
+            <button onclick="window.outboxMonitor?.show()">打开监控面板</button>
+            <button onclick="exportOutboxData()">导出 Outbox 数据</button>
+            <button onclick="runStressTest()">压力测试 (100 操作)</button>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 测试日志</h2>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="test-log" class="log">等待操作...</div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="outbox-system.js"></script>
+    <script src="outbox-monitor.js"></script>
+    
+    <script>
+        // ==================== 测试脚本 ====================
+        
+        let testHabits = [];
+        let isOfflineMode = false;
+
+        // 初始化测试环境
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('🔧 初始化测试环境...');
+            
+            // 等待 outbox 系统初始化
+            await waitForOutboxSystem();
+            
+            // 模拟 Supabase 可用性
+            window.isSupabaseAvailable = true;
+            window.supabaseClient = createMockSupabase();
+            
+            // 开始统计刷新
+            setInterval(updateStats, 2000);
+            
+            updateSystemStatus('success', '系统已就绪，可以开始测试');
+            log('✅ 测试环境初始化完成');
+        });
+
+        async function waitForOutboxSystem() {
+            let attempts = 0;
+            while (!window.outboxSystem && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.outboxSystem) {
+                throw new Error('Outbox 系统初始化失败');
+            }
+        }
+
+        function createMockSupabase() {
+            return {
+                rpc: async (functionName, data) => {
+                    log(`🔗 调用 RPC: ${functionName}`, data);
+                    
+                    if (isOfflineMode) {
+                        throw new Error('网络不可用 (模拟离线)');
+                    }
+                    
+                    // 模拟网络延迟
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+                    
+                    // 模拟随机失败 (5% 概率)
+                    if (Math.random() < 0.05) {
+                        throw new Error('随机网络错误 (测试用)');
+                    }
+                    
+                    return { 
+                        data: { success: true, mutation_id: data.mutation_id },
+                        error: null 
+                    };
+                }
+            };
+        }
+
+        // ==================== 测试函数 ====================
+
+        async function createTestHabit() {
+            const name = document.getElementById('habit-name').value || '测试习惯';
+            const description = document.getElementById('habit-desc').value || '测试描述';
+            
+            const habit = {
+                id: 'test-' + Date.now(),
+                name,
+                description,
+                color: '#007AFF',
+                checkmarks: {},
+                weeklyHighest: 0,
+                weeklyTarget: 1,
+                weeklyRecords: {}
+            };
+
+            testHabits.push(habit);
+            
+            try {
+                await window.outboxSystem.addMutation('create', 'habit', habit.id, habit);
+                log(`✅ 创建习惯: ${name} (${habit.id})`);
+            } catch (error) {
+                log(`❌ 创建习惯失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function createMultipleHabits(count) {
+            log(`🔄 批量创建 ${count} 个习惯...`);
+            
+            for (let i = 0; i < count; i++) {
+                const habit = {
+                    id: 'batch-' + Date.now() + '-' + i,
+                    name: `批量习惯 ${i + 1}`,
+                    description: `这是第 ${i + 1} 个批量创建的习惯`,
+                    color: ['#FF3B30', '#FF9500', '#FFCC00', '#34C759', '#007AFF'][i % 5],
+                    checkmarks: {},
+                    weeklyHighest: 0,
+                    weeklyTarget: 1,
+                    weeklyRecords: {}
+                };
+
+                testHabits.push(habit);
+                await window.outboxSystem.addMutation('create', 'habit', habit.id, habit);
+                
+                // 小延迟避免过快
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            
+            log(`✅ 批量创建完成: ${count} 个习惯`);
+        }
+
+        async function toggleRandomCheckmarks(count) {
+            if (testHabits.length === 0) {
+                log('❌ 没有可用的测试习惯，请先创建习惯', 'error');
+                return;
+            }
+
+            log(`🔄 随机打卡 ${count} 次...`);
+
+            for (let i = 0; i < count; i++) {
+                const habit = testHabits[Math.floor(Math.random() * testHabits.length)];
+                const dateStr = new Date().toISOString().split('T')[0];
+                
+                // 切换打卡状态
+                if (habit.checkmarks[dateStr]) {
+                    delete habit.checkmarks[dateStr];
+                } else {
+                    habit.checkmarks[dateStr] = true;
+                }
+
+                await window.outboxSystem.addMutation('update', 'habit', habit.id, habit);
+                await new Promise(resolve => setTimeout(resolve, 30));
+            }
+
+            log(`✅ 随机打卡完成: ${count} 次`);
+        }
+
+        async function deleteRandomHabits(count) {
+            const availableHabits = testHabits.slice(); // 复制数组
+            if (availableHabits.length === 0) {
+                log('❌ 没有可删除的习惯', 'error');
+                return;
+            }
+
+            const toDelete = Math.min(count, availableHabits.length);
+            log(`🔄 随机删除 ${toDelete} 个习惯...`);
+
+            for (let i = 0; i < toDelete; i++) {
+                const index = Math.floor(Math.random() * availableHabits.length);
+                const habit = availableHabits.splice(index, 1)[0];
+                
+                await window.outboxSystem.addMutation('delete', 'habit', habit.id, habit);
+                
+                // 从测试数组中移除
+                testHabits = testHabits.filter(h => h.id !== habit.id);
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            log(`✅ 随机删除完成: ${toDelete} 个习惯`);
+        }
+
+        function simulateOffline() {
+            isOfflineMode = true;
+            updateSystemStatus('warning', '模拟离线模式已启用 (5秒)');
+            log('📡 模拟离线模式启用...');
+            
+            setTimeout(() => {
+                isOfflineMode = false;
+                updateSystemStatus('success', '网络已恢复');
+                log('📡 网络恢复，开始重试同步...');
+                forceSync();
+            }, 5000);
+        }
+
+        async function forceSync() {
+            try {
+                log('🔄 强制同步中...');
+                await window.outboxSystem.triggerSync();
+                log('✅ 强制同步完成');
+            } catch (error) {
+                log(`❌ 强制同步失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearOutbox() {
+            if (!confirm('确定要清空所有 Outbox 数据吗？这将删除所有未同步的变更。')) {
+                return;
+            }
+
+            try {
+                // 这里需要添加清空 Outbox 的方法
+                log('🗑️ 清空 Outbox 功能需要实现...');
+            } catch (error) {
+                log(`❌ 清空失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function exportOutboxData() {
+            try {
+                const stats = await window.outboxSystem.getStats();
+                const data = {
+                    stats,
+                    timestamp: new Date().toISOString(),
+                    testHabits: testHabits.length
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], {
+                    type: 'application/json'
+                });
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `outbox-data-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                log('📁 Outbox 数据已导出');
+            } catch (error) {
+                log(`❌ 导出失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function runStressTest() {
+            log('🔥 开始压力测试 (100 个操作)...');
+            updateSystemStatus('warning', '压力测试进行中...');
+
+            const operations = [];
+            
+            // 生成 100 个随机操作
+            for (let i = 0; i < 100; i++) {
+                const type = Math.random();
+                if (type < 0.6) {
+                    operations.push('create');
+                } else if (type < 0.9) {
+                    operations.push('update');
+                } else {
+                    operations.push('delete');
+                }
+            }
+
+            let completed = 0;
+            const startTime = Date.now();
+
+            for (const operation of operations) {
+                try {
+                    if (operation === 'create') {
+                        await createTestHabit();
+                    } else if (operation === 'update' && testHabits.length > 0) {
+                        await toggleRandomCheckmarks(1);
+                    } else if (operation === 'delete' && testHabits.length > 0) {
+                        await deleteRandomHabits(1);
+                    }
+                    
+                    completed++;
+                    
+                    if (completed % 10 === 0) {
+                        log(`⏳ 压力测试进度: ${completed}/100`);
+                    }
+                    
+                    // 小延迟避免过载
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                } catch (error) {
+                    log(`❌ 压力测试操作失败: ${error.message}`);
+                }
+            }
+
+            const duration = Date.now() - startTime;
+            log(`🎉 压力测试完成！耗时: ${duration}ms, 完成操作: ${completed}/100`);
+            updateSystemStatus('success', `压力测试完成 (${duration}ms)`);
+        }
+
+        // ==================== 辅助函数 ====================
+
+        async function updateStats() {
+            if (!window.outboxSystem) return;
+
+            try {
+                const stats = await window.outboxSystem.getStats();
+                document.getElementById('total-mutations').textContent = stats.total;
+                document.getElementById('pending-mutations').textContent = stats.pending;
+                document.getElementById('failed-mutations').textContent = stats.failed;
+                document.getElementById('delivered-mutations').textContent = stats.delivered;
+            } catch (error) {
+                // 静默失败
+            }
+        }
+
+        function updateSystemStatus(type, message) {
+            const statusEl = document.getElementById('system-status');
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = `<strong>系统状态:</strong> ${message}`;
+        }
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'warning' ? '#ffa500' : '#00ff00';
+            
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '日志已清空...';
+        }
+
+        // 添加键盘快捷键
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'h':
+                        e.preventDefault();
+                        createTestHabit();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        forceSync();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        clearLog();
+                        break;
+                }
+            }
+        });
+
+        log('🎮 快捷键: Ctrl+H (创建习惯), Ctrl+S (同步), Ctrl+L (清空日志)');
+    </script>
+</body>
+</html>

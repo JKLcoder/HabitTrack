@@ -1,0 +1,47 @@
+{
+  "name": "habit-track-outbox",
+  "version": "1.0.0",
+  "description": "HabitTrack 应用的 Outbox 离线优先同步系统",
+  "main": "index.html",
+  "scripts": {
+    "start": "node dev-server.js",
+    "dev": "node dev-server.js",
+    "test": "echo '打开 http://localhost:8080/test-outbox.html 进行测试'",
+    "verify": "echo '在浏览器控制台运行 verify-outbox.js 脚本'",
+    "setup": "echo '请在 Supabase SQL Editor 中执行 supabase-setup.sql 文件'"
+  },
+  "keywords": [
+    "habit-tracker",
+    "outbox-pattern",
+    "offline-first",
+    "sync",
+    "indexeddb",
+    "supabase"
+  ],
+  "author": "Claude Code",
+  "license": "MIT",
+  "files": [
+    "index.html",
+    "script.js",
+    "styles.css",
+    "outbox-system.js",
+    "outbox-monitor.js",
+    "service-worker.js",
+    "test-outbox.html",
+    "verify-outbox.js",
+    "supabase-setup.sql",
+    "OUTBOX-README.md",
+    "dev-server.js"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/habit-track-outbox.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/habit-track-outbox/issues"
+  },
+  "homepage": "https://github.com/your-username/habit-track-outbox#readme"
+}
